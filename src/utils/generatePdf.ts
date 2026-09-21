@@ -1,6 +1,7 @@
 import jsPDF from 'jspdf';
 import { Seal } from './parseTxt';
 import { generateBarcode } from './barcode';
+import { LEVE_LOGO_BASE64, LEVE_LOGO_ASPECT_RATIO } from '../assets/leveLogoBase64';
 
 // Seal dimensions in millimeters
 const SEAL_WIDTH_MM = 70; // 7cm
@@ -9,7 +10,7 @@ const SEAL_HEIGHT_MM = 25; // 2.5cm
 // Fixed zone reserved for the logo (mirrors the flex-shrink-0 logo column
 // used in the on-screen preview, Seal.tsx). The code/convenio block is
 // centered only within the remaining space so it never overlaps the logo.
-const LOGO_ZONE_WIDTH_MM = 20;
+const LOGO_ZONE_WIDTH_MM = 27;
 const CONTENT_PADDING_MM = 2; // small right padding so text doesn't touch the border
 
 // Page dimensions
@@ -117,16 +118,25 @@ function renderSeal(
     doc.rect(x, y, SEAL_WIDTH_MM, SEAL_HEIGHT_MM);
   }
 
-  // Add LEVE logo — confined to its own fixed-width zone on the left,
-  // vertically centered, so it can never be overlapped by the code text.
-  const logoCenterX = x + LOGO_ZONE_WIDTH_MM / 2;
-  doc.setFontSize(10);
-  doc.setFont(undefined, 'bold');
-  doc.setTextColor(0, 51, 102); // LEVE blue
-  doc.text('LEVÉ', logoCenterX, y + SEAL_HEIGHT_MM / 2 - 1, { align: 'center' });
-  doc.setFontSize(6);
-  doc.setFont(undefined, 'normal');
-  doc.text('MOBILIDADE', logoCenterX, y + SEAL_HEIGHT_MM / 2 + 3, { align: 'center' });
+  // Add LEVE logo — the real logo image, confined to its own fixed-width
+  // zone on the left and vertically centered, so it can never be
+  // overlapped by the code text (mirrors the on-screen preview, Seal.tsx).
+  const logoPaddingXMm = 1.5;
+  const logoPaddingYMm = 2;
+  const logoMaxWidthMm = LOGO_ZONE_WIDTH_MM - logoPaddingXMm * 2;
+  const logoMaxHeightMm = SEAL_HEIGHT_MM - logoPaddingYMm * 2;
+
+  let logoWidthMm = logoMaxWidthMm;
+  let logoHeightMm = logoWidthMm / LEVE_LOGO_ASPECT_RATIO;
+  if (logoHeightMm > logoMaxHeightMm) {
+    logoHeightMm = logoMaxHeightMm;
+    logoWidthMm = logoHeightMm * LEVE_LOGO_ASPECT_RATIO;
+  }
+
+  const logoX = x + (LOGO_ZONE_WIDTH_MM - logoWidthMm) / 2;
+  const logoY = y + (SEAL_HEIGHT_MM - logoHeightMm) / 2;
+
+  doc.addImage(LEVE_LOGO_BASE64, 'PNG', logoX, logoY, logoWidthMm, logoHeightMm);
 
   // Content area starts right after the logo zone. The code and convenio
   // are centered within THIS area only (never within the full seal width),
