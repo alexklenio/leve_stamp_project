@@ -56,10 +56,10 @@ export default function App() {
       <header className="bg-leve-blue text-white p-6 shadow-lg">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center gap-3 mb-2">
-            <div className="text-2xl font-bold">LEVÉ</div>
-            <span className="text-gray-300 text-sm">Gerador de Selos</span>
+            <div className="text-2xl font-bold">LEVE MOBILIDADE</div>
+            <span className="text-gray-300 text-sm"> - SETOR DE AUDITORIA</span>
           </div>
-          <p className="text-gray-200 text-sm">Liberação rápida, prática e segura</p>
+          <p className="text-gray-200 text-sm">Ferramenta de geração de selos.</p>
         </div>
       </header>
 
@@ -222,7 +222,7 @@ export default function App() {
       {/* Footer */}
       <footer className="bg-gray-800 text-gray-400 text-center py-4 mt-12">
         <p className="text-sm">
-          Solução rápida e confiável para geração de selos de liberação LEVÉ Mobilidade
+          Desenvolvido por Alex Lopes - Solução rápida para geração de selos de liberação
         </p>
       </footer>
     </div>
