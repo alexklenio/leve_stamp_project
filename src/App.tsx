@@ -3,6 +3,7 @@ import { UploadBox } from './components/UploadBox';
 import { SealGrid } from './components/SealGrid';
 import { Toolbar } from './components/Toolbar';
 import { parseTxt, validateSeals, Seal } from './utils/parseTxt';
+import { LEVE_LOGO_WHITE_BASE64, LEVE_LOGO_WHITE_ASPECT_RATIO } from './assets/leveLogoBase64';
 
 export default function App() {
   const [seals, setSeals] = useState<Seal[]>([]);
@@ -53,11 +54,20 @@ export default function App() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       {/* Header */}
-      <header className="bg-leve-blue text-white p-6 shadow-lg">
+      <header className="bg-leve-blue text-white px-6 py-3 shadow-lg">
         <div className="max-w-7xl mx-auto">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="text-2xl font-bold">LEVE MOBILIDADE</div>
-            <span className="text-gray-300 text-sm"> - SETOR DE AUDITORIA</span>
+          <div className="flex items-center gap-4 mb-2">
+            <img
+              src={LEVE_LOGO_WHITE_BASE64}
+              alt="LEVÉ Mobilidade"
+              style={{
+                height: '76px',
+                width: `${76 * LEVE_LOGO_WHITE_ASPECT_RATIO}px`,
+              }}
+            />
+            <span className="text-xl md:text-2xl font-bold tracking-tight">
+              - SETOR DE AUDITORIA
+            </span>
           </div>
           <p className="text-gray-200 text-sm">Ferramenta de geração de selos.</p>
         </div>
@@ -222,7 +232,7 @@ export default function App() {
       {/* Footer */}
       <footer className="bg-gray-800 text-gray-400 text-center py-4 mt-12">
         <p className="text-sm">
-          Desenvolvido por Alex Lopes - Solução rápida para geração de selos de liberação
+          Solução rápida e confiável para geração de selos de liberação LEVÉ Mobilidade
         </p>
       </footer>
     </div>
