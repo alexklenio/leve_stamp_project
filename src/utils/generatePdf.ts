@@ -155,10 +155,11 @@ function renderSeal(
     maxWidth: contentWidth,
   });
 
-  // Add convenio if present (centered within content area, smaller)
+  // Add convenio if present (centered within content area, smaller, bold
+  // for better visibility/legibility when printed)
   if (seal.convenio) {
     doc.setFontSize(6);
-    doc.setFont(undefined, 'normal');
+    doc.setFont(undefined, 'bold');
     doc.setTextColor(0, 0, 0);
     const convenioY = codigoY + 5;
 

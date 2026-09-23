@@ -232,7 +232,7 @@ export default function App() {
       {/* Footer */}
       <footer className="bg-gray-800 text-gray-400 text-center py-4 mt-12">
         <p className="text-sm">
-          Solução rápida e confiável para geração de selos de liberação LEVÉ Mobilidade
+          Leve Mobilidade 2026 | Setor de Auditoria | Desenvolvido por Alex Lopes
         </p>
       </footer>
     </div>
