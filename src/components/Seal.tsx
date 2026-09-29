@@ -72,7 +72,7 @@ export const Seal: React.FC<SealProps> = ({
           </div>
           {seal.convenio && (
             <div
-              className="text-gray-700 text-center leading-none"
+              className="font-bold text-black text-center leading-none"
               style={{ fontSize: '5px' }}
             >
               {seal.convenio.length > 35
