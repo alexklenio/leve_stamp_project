@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React from 'react';
 import { Seal as SealType } from '../utils/parseTxt';
 import { Seal } from './Seal';
 

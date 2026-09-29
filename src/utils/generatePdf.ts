@@ -1,6 +1,5 @@
 import jsPDF from 'jspdf';
 import { Seal } from './parseTxt';
-import { generateBarcode } from './barcode';
 import { LEVE_LOGO_BASE64, LEVE_LOGO_ASPECT_RATIO } from '../assets/leveLogoBase64';
 
 // Seal dimensions in millimeters
@@ -60,15 +59,6 @@ export async function generatePdf(
   const sealsPerCol = Math.floor(
     (A4_HEIGHT_MM - MARGIN_MM * 2) / SEAL_HEIGHT_MM
   );
-  const totalSealsPerPage = sealsPerRow * sealsPerCol;
-
-  // Generate all barcodes first
-  const barcodes = new Map<string, string>();
-  for (const seal of seals) {
-    const barcode = generateBarcode(seal.codigo, options.barcodeType);
-    barcodes.set(seal.codigo, barcode);
-  }
-
   // Render pages
   let sealIndex = 0;
   let pageNum = 1;
@@ -87,7 +77,7 @@ export async function generatePdf(
         const x = CONTENT_START_X_MM + col * (SEAL_WIDTH_MM + COLUMN_GAP_MM);
         const y = MARGIN_MM + row * SEAL_HEIGHT_MM;
 
-        renderSeal(doc, seal, x, y, options.showBorders, barcodes.get(seal.codigo) || '');
+        renderSeal(doc, seal, x, y, options.showBorders);
         sealIndex++;
       }
       if (sealIndex >= seals.length) break;
@@ -108,8 +98,7 @@ function renderSeal(
   seal: Seal,
   x: number,
   y: number,
-  showBorders: boolean,
-  barcodeImage: string
+  showBorders: boolean
 ): void {
   // Draw border if requested — solid black, thick enough for a clean cut line.
   if (showBorders) {
@@ -147,7 +136,7 @@ function renderSeal(
 
   // Add codigo (centered within content area)
   doc.setFontSize(16);
-  doc.setFont(undefined, 'bold');
+  doc.setFont('helvetica', 'bold');
   doc.setTextColor(0, 0, 0);
   const codigoY = seal.convenio ? y + SEAL_HEIGHT_MM / 2 - 1 : y + SEAL_HEIGHT_MM / 2 + 2;
   doc.text(seal.codigo, contentCenterX, codigoY, {
@@ -159,7 +148,7 @@ function renderSeal(
   // for better visibility/legibility when printed)
   if (seal.convenio) {
     doc.setFontSize(6);
-    doc.setFont(undefined, 'bold');
+    doc.setFont('helvetica', 'bold');
     doc.setTextColor(0, 0, 0);
     const convenioY = codigoY + 5;
 
@@ -191,13 +180,6 @@ export async function generatePdfPreview(seals: Seal[], showBorders: boolean = t
     (A4_HEIGHT_MM - MARGIN_MM * 2) / SEAL_HEIGHT_MM
   );
 
-  // Generate barcodes
-  const barcodes = new Map<string, string>();
-  for (const seal of seals) {
-    const barcode = generateBarcode(seal.codigo, 'code128');
-    barcodes.set(seal.codigo, barcode);
-  }
-
   let sealIndex = 0;
   let pageNum = 1;
 
@@ -214,7 +196,7 @@ export async function generatePdfPreview(seals: Seal[], showBorders: boolean = t
         const x = CONTENT_START_X_MM + col * (SEAL_WIDTH_MM + COLUMN_GAP_MM);
         const y = MARGIN_MM + row * SEAL_HEIGHT_MM;
 
-        renderSeal(doc, seal, x, y, showBorders, barcodes.get(seal.codigo) || '');
+        renderSeal(doc, seal, x, y, showBorders);
         sealIndex++;
       }
       if (sealIndex >= seals.length) break;

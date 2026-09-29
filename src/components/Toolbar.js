@@ -1,6 +1,6 @@
 import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-runtime";
 import { generatePdf } from '../utils/generatePdf';
-export const Toolbar = ({ seals, zoom, onZoomChange, showBorders, onShowBordersChange, barcodeType, onBarcodeTypeChange, sealsPerPage, onSealsPerPageChange, convenio = '', onConvenioChange, isLoading = false, }) => {
+export const Toolbar = ({ seals, zoom, onZoomChange, showBorders, onShowBordersChange, barcodeType, onBarcodeTypeChange, sealsPerPage, onSealsPerPageChange, isLoading = false, }) => {
     const handleExportPdf = async () => {
         if (seals.length === 0) {
             alert('Nenhum selo para exportar');

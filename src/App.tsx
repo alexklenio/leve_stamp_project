@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { UploadBox } from './components/UploadBox';
 import { SealGrid } from './components/SealGrid';
 import { Toolbar } from './components/Toolbar';
@@ -7,7 +7,7 @@ import { LEVE_LOGO_WHITE_BASE64, LEVE_LOGO_WHITE_ASPECT_RATIO } from './assets/l
 
 export default function App() {
   const [seals, setSeals] = useState<Seal[]>([]);
-  const [invalidSeals, setInvalidSeals] = useState<Seal[]>([]);
+  // 'invalidSeals' foi removido daqui pois não era utilizado
   const [zoom, setZoom] = useState(100);
   const [showBorders, setShowBorders] = useState(true);
   const [barcodeType, setBarcodeType] = useState<'numeric' | 'code128'>('code128');
@@ -34,7 +34,7 @@ export default function App() {
       const { valid, invalid } = validateSeals(parsedSeals);
 
       setSeals(valid);
-      setInvalidSeals(invalid);
+      // setInvalidSeals(invalid); <- Removido
       setCurrentPage(1);
 
       // Show warning if there are invalid seals
@@ -45,7 +45,7 @@ export default function App() {
       console.error('Erro ao processar arquivo:', error);
       alert('Erro ao processar o arquivo. Verifique o formato.');
       setSeals([]);
-      setInvalidSeals([]);
+      // setInvalidSeals([]); <- Removido
     } finally {
       setIsLoading(false);
     }
@@ -193,8 +193,6 @@ export default function App() {
                 onBarcodeTypeChange={setBarcodeType}
                 sealsPerPage={sealsPerPage}
                 onSealsPerPageChange={setSealsPerPage}
-                convenio={convenio}
-                onConvenioChange={setConvenio}
                 isLoading={isLoading}
               />
             )}
@@ -232,7 +230,7 @@ export default function App() {
       {/* Footer */}
       <footer className="bg-gray-800 text-gray-400 text-center py-4 mt-12">
         <p className="text-sm">
-          Leve Mobilidade 2026 | Setor de Auditoria | Desenvolvido por Alex Lopes
+          Solução rápida e confiável para geração de selos de liberação LEVÉ Mobilidade
         </p>
       </footer>
     </div>

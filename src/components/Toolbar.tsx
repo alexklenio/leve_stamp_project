@@ -12,8 +12,6 @@ interface ToolbarProps {
   onBarcodeTypeChange: (type: 'numeric' | 'code128') => void;
   sealsPerPage: number;
   onSealsPerPageChange: (count: number) => void;
-  convenio?: string;
-  onConvenioChange?: (convenio: string) => void;
   isLoading?: boolean;
 }
 
@@ -27,8 +25,6 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   onBarcodeTypeChange,
   sealsPerPage,
   onSealsPerPageChange,
-  convenio = '',
-  onConvenioChange,
   isLoading = false,
 }) => {
   const handleExportPdf = async () => {

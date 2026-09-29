@@ -2,7 +2,7 @@ import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import { useEffect, useRef } from 'react';
 import JsBarcode from 'jsbarcode';
 import { LEVE_LOGO_BASE64 } from '../assets/leveLogoBase64';
-export const Seal = ({ seal, showBorders = true, barcodeType = 'code128' }) => {
+export const Seal = ({ seal, showBorders = true }) => {
     const barcodeRef = useRef(null);
     useEffect(() => {
         if (barcodeRef.current) {
@@ -35,6 +35,6 @@ export const Seal = ({ seal, showBorders = true, barcodeType = 'code128' }) => {
                                 : seal.convenio }))] })] }) }));
 };
 // Preview component for tooltip/modal
-export const SealPreview = ({ seal, showBorders, barcodeType }) => {
-    return (_jsx("div", { className: "bg-white p-4 rounded-lg shadow-lg", children: _jsx(Seal, { seal: seal, showBorders: showBorders, barcodeType: barcodeType }) }));
+export const SealPreview = ({ seal, showBorders }) => {
+    return (_jsx("div", { className: "bg-white p-4 rounded-lg shadow-lg", children: _jsx(Seal, { seal: seal, showBorders: showBorders }) }));
 };

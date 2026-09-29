@@ -11,8 +11,7 @@ interface SealProps {
 
 export const Seal: React.FC<SealProps> = ({ 
   seal, 
-  showBorders = true,
-  barcodeType = 'code128' 
+  showBorders = true
 }) => {
   const barcodeRef = useRef<SVGSVGElement>(null);
 
@@ -87,10 +86,10 @@ export const Seal: React.FC<SealProps> = ({
 };
 
 // Preview component for tooltip/modal
-export const SealPreview: React.FC<SealProps> = ({ seal, showBorders, barcodeType }) => {
+export const SealPreview: React.FC<SealProps> = ({ seal, showBorders }) => {
   return (
     <div className="bg-white p-4 rounded-lg shadow-lg">
-      <Seal seal={seal} showBorders={showBorders} barcodeType={barcodeType} />
+      <Seal seal={seal} showBorders={showBorders} />
     </div>
   );
 };
