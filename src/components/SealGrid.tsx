@@ -33,17 +33,35 @@ export const SealGrid: React.FC<SealGridProps> = ({
 
   return (
     <div className="flex flex-col gap-4">
-      {/* Grid */}
+      {/* Grid — the OUTER box has a fixed height and overflow:hidden, so it
+          can never grow or bleed past its box no matter what. Scrolling
+          happens on the INNER wrapper, and the zoom transform is applied
+          only to the wrapper inside that — so zooming only changes the
+          seals' visual size, never the footprint this component occupies
+          on the page. */}
       <div
-        className="bg-white p-8 rounded-lg shadow-sm overflow-auto"
-        style={{ transform: `scale(${zoom / 100})`, transformOrigin: 'top left' }}
+        className="bg-white rounded-lg shadow-sm"
+        style={{ height: '70vh', overflow: 'hidden' }}
       >
-        <div className="grid grid-cols-2 gap-4 w-fit">
-          {currentSeals.map((seal) => (
-            <div key={seal.id} className="flex justify-center">
-              <Seal seal={seal} showBorders={showBorders} />
+        <div
+          className="w-full h-full overflow-auto"
+        >
+          <div
+            className="p-8"
+            style={{
+              transform: `scale(${zoom / 100})`,
+              transformOrigin: 'top left',
+              width: 'fit-content',
+            }}
+          >
+            <div className="grid grid-cols-2 gap-4 w-fit">
+              {currentSeals.map((seal) => (
+                <div key={seal.id} className="flex justify-center">
+                  <Seal seal={seal} showBorders={showBorders} />
+                </div>
+              ))}
             </div>
-          ))}
+          </div>
         </div>
       </div>
 
