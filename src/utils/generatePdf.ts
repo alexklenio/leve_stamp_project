@@ -6,12 +6,30 @@ import { generateBarcode } from './barcode';
 const SEAL_WIDTH_MM = 70; // 7cm
 const SEAL_HEIGHT_MM = 25; // 2.5cm
 
+// Fixed zone reserved for the logo (mirrors the flex-shrink-0 logo column
+// used in the on-screen preview, Seal.tsx). The code/convenio block is
+// centered only within the remaining space so it never overlaps the logo.
+const LOGO_ZONE_WIDTH_MM = 20;
+const CONTENT_PADDING_MM = 2; // small right padding so text doesn't touch the border
+
 // Page dimensions
 const A4_WIDTH_MM = 210;
 const A4_HEIGHT_MM = 297;
 
 // Margins
 const MARGIN_MM = 10;
+
+// Layout: 2 columns of seals, with a visible gap between them, and the
+// whole two-column block centered horizontally on the page (rather than
+// pinned to the left margin).
+const SEALS_PER_ROW = 2;
+const COLUMN_GAP_MM = 8;
+const CONTENT_START_X_MM =
+  (A4_WIDTH_MM - (SEALS_PER_ROW * SEAL_WIDTH_MM + (SEALS_PER_ROW - 1) * COLUMN_GAP_MM)) / 2;
+
+// Border: solid black and thick enough to be a clear, easy-to-follow cut line.
+const BORDER_COLOR: [number, number, number] = [0, 0, 0];
+const BORDER_WIDTH_MM = 0.6;
 
 interface PdfOptions {
   sealsPerPage: number;
@@ -37,7 +55,7 @@ export async function generatePdf(
   });
 
   // Calculate layout
-  const sealsPerRow = 2;
+  const sealsPerRow = SEALS_PER_ROW;
   const sealsPerCol = Math.floor(
     (A4_HEIGHT_MM - MARGIN_MM * 2) / SEAL_HEIGHT_MM
   );
@@ -65,7 +83,7 @@ export async function generatePdf(
         if (sealIndex >= seals.length) break;
 
         const seal = seals[sealIndex];
-        const x = MARGIN_MM + col * SEAL_WIDTH_MM;
+        const x = CONTENT_START_X_MM + col * (SEAL_WIDTH_MM + COLUMN_GAP_MM);
         const y = MARGIN_MM + row * SEAL_HEIGHT_MM;
 
         renderSeal(doc, seal, x, y, options.showBorders, barcodes.get(seal.codigo) || '');
@@ -92,42 +110,58 @@ function renderSeal(
   showBorders: boolean,
   barcodeImage: string
 ): void {
-  // Draw border if requested
+  // Draw border if requested — solid black, thick enough for a clean cut line.
   if (showBorders) {
-    doc.setDrawColor(200, 200, 200);
-    doc.setLineWidth(0.5);
+    doc.setDrawColor(...BORDER_COLOR);
+    doc.setLineWidth(BORDER_WIDTH_MM);
     doc.rect(x, y, SEAL_WIDTH_MM, SEAL_HEIGHT_MM);
   }
 
-  // Add LEVE logo (simplified - using text as placeholder)
+  // Add LEVE logo — confined to its own fixed-width zone on the left,
+  // vertically centered, so it can never be overlapped by the code text.
+  const logoCenterX = x + LOGO_ZONE_WIDTH_MM / 2;
   doc.setFontSize(10);
+  doc.setFont(undefined, 'bold');
   doc.setTextColor(0, 51, 102); // LEVE blue
-  doc.text('LEVÉ', x + 5, y + 10);
-  doc.setFontSize(7);
-  doc.text('MOBILIDADE', x + 5, y + 14);
+  doc.text('LEVÉ', logoCenterX, y + SEAL_HEIGHT_MM / 2 - 1, { align: 'center' });
+  doc.setFontSize(6);
+  doc.setFont(undefined, 'normal');
+  doc.text('MOBILIDADE', logoCenterX, y + SEAL_HEIGHT_MM / 2 + 3, { align: 'center' });
 
-  // Add codigo (centered)
+  // Content area starts right after the logo zone. The code and convenio
+  // are centered within THIS area only (never within the full seal width),
+  // so they never invade the logo zone regardless of code length.
+  const contentStartX = x + LOGO_ZONE_WIDTH_MM;
+  const contentWidth = SEAL_WIDTH_MM - LOGO_ZONE_WIDTH_MM - CONTENT_PADDING_MM;
+  const contentCenterX = contentStartX + contentWidth / 2;
+
+  // Add codigo (centered within content area)
   doc.setFontSize(16);
   doc.setFont(undefined, 'bold');
   doc.setTextColor(0, 0, 0);
-  const codigoX = x + SEAL_WIDTH_MM / 2;
-  const codigoY = y + 15;
-  doc.text(seal.codigo, codigoX, codigoY, { align: 'center' });
+  const codigoY = seal.convenio ? y + SEAL_HEIGHT_MM / 2 - 1 : y + SEAL_HEIGHT_MM / 2 + 2;
+  doc.text(seal.codigo, contentCenterX, codigoY, {
+    align: 'center',
+    maxWidth: contentWidth,
+  });
 
-  // Add convenio if present (centered, smaller)
+  // Add convenio if present (centered within content area, smaller)
   if (seal.convenio) {
     doc.setFontSize(6);
     doc.setFont(undefined, 'normal');
     doc.setTextColor(0, 0, 0);
-    const convenioY = codigoY + 4;
-    
+    const convenioY = codigoY + 5;
+
     // Truncate long text to fit
     let convenio = seal.convenio;
     if (convenio.length > 40) {
       convenio = convenio.substring(0, 37) + '...';
     }
-    
-    doc.text(convenio, codigoX, convenioY, { align: 'center' });
+
+    doc.text(convenio, contentCenterX, convenioY, {
+      align: 'center',
+      maxWidth: contentWidth,
+    });
   }
 }
 
@@ -141,7 +175,7 @@ export async function generatePdfPreview(seals: Seal[], showBorders: boolean = t
     format: 'A4',
   });
 
-  const sealsPerRow = 2;
+  const sealsPerRow = SEALS_PER_ROW;
   const sealsPerCol = Math.floor(
     (A4_HEIGHT_MM - MARGIN_MM * 2) / SEAL_HEIGHT_MM
   );
@@ -166,7 +200,7 @@ export async function generatePdfPreview(seals: Seal[], showBorders: boolean = t
         if (sealIndex >= seals.length) break;
 
         const seal = seals[sealIndex];
-        const x = MARGIN_MM + col * SEAL_WIDTH_MM;
+        const x = CONTENT_START_X_MM + col * (SEAL_WIDTH_MM + COLUMN_GAP_MM);
         const y = MARGIN_MM + row * SEAL_HEIGHT_MM;
 
         renderSeal(doc, seal, x, y, showBorders, barcodes.get(seal.codigo) || '');
