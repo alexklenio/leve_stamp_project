@@ -9,6 +9,7 @@ interface SealGridProps {
   zoom?: number;
   currentPage?: number;
   onPageChange?: (page: number) => void;
+  barcodeType?: 'numeric' | 'code128';
 }
 
 export const SealGrid: React.FC<SealGridProps> = ({
@@ -18,6 +19,7 @@ export const SealGrid: React.FC<SealGridProps> = ({
   zoom = 100,
   currentPage = 1,
   onPageChange,
+  barcodeType = 'code128',
 }) => {
   const totalPages = Math.ceil(seals.length / sealsPerPage);
   const startIndex = (currentPage - 1) * sealsPerPage;
@@ -57,7 +59,7 @@ export const SealGrid: React.FC<SealGridProps> = ({
             <div className="grid grid-cols-2 gap-4 w-fit">
               {currentSeals.map((seal) => (
                 <div key={seal.id} className="flex justify-center">
-                  <Seal seal={seal} showBorders={showBorders} />
+                  <Seal seal={seal} showBorders={showBorders} barcodeType={barcodeType} />
                 </div>
               ))}
             </div>

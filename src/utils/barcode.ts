@@ -2,44 +2,44 @@ import JsBarcode from 'jsbarcode';
 
 export type BarcodeType = 'numeric' | 'code128';
 
-/**
- * Generate a barcode as SVG string
- */
-export function generateBarcode(codigo: string, type: BarcodeType = 'code128'): string {
-  try {
-    const canvas = document.createElement('canvas');
-    const format = type === 'code128' ? 'CODE128' : 'CODE128'; // Both use CODE128, just display differs
-    
-    JsBarcode(canvas, codigo, {
-      format: format,
-      width: 2,
-      height: 40,
-      displayValue: false,
-      margin: 0,
-    });
-
-    return canvas.toDataURL('image/png');
-  } catch (error) {
-    console.error('Error generating barcode:', error);
-    return '';
-  }
+export interface BarcodeImage {
+  dataUrl: string;
+  width: number;
+  height: number;
 }
 
 /**
- * Generate multiple barcodes for batch processing
+ * Generate a Code 128 barcode as a PNG data URL, plus its pixel dimensions
+ * (needed by the PDF export to size the image without distorting it).
+ *
+ * 'numeric' means "no scannable barcode graphic — just the plain number",
+ * which is the whole point of offering it as an alternative to 'code128'.
+ * So this returns null for 'numeric', and callers should simply not draw
+ * anything when they get null back.
  */
-export async function generateBarcodes(
-  codigos: string[],
-  type: BarcodeType = 'code128'
-): Promise<Map<string, string>> {
-  const barcodes = new Map<string, string>();
-
-  for (const codigo of codigos) {
-    const barcode = generateBarcode(codigo, type);
-    if (barcode) {
-      barcodes.set(codigo, barcode);
-    }
+export function generateBarcode(codigo: string, type: BarcodeType): BarcodeImage | null {
+  if (type !== 'code128') {
+    return null;
   }
 
-  return barcodes;
+  try {
+    const canvas = document.createElement('canvas');
+
+    JsBarcode(canvas, codigo, {
+      format: 'CODE128',
+      width: 1.5,
+      height: 40,
+      displayValue: false,
+      margin: 4,
+    });
+
+    return {
+      dataUrl: canvas.toDataURL('image/png'),
+      width: canvas.width,
+      height: canvas.height,
+    };
+  } catch (error) {
+    console.error('Error generating barcode:', error);
+    return null;
+  }
 }

@@ -1,5 +1,6 @@
 import jsPDF from 'jspdf';
 import { Seal } from './parseTxt';
+import { generateBarcode } from './barcode';
 import { LEVE_LOGO_BASE64, LEVE_LOGO_ASPECT_RATIO } from '../assets/leveLogoBase64';
 
 // Seal dimensions in millimeters
@@ -30,6 +31,10 @@ const CONTENT_START_X_MM =
 // Border: solid black and thick enough to be a clear, easy-to-follow cut line.
 const BORDER_COLOR: [number, number, number] = [0, 0, 0];
 const BORDER_WIDTH_MM = 0.6;
+
+// Barcode graphic sizing (only used when barcodeType === 'code128')
+const BARCODE_MAX_HEIGHT_MM = 7;
+const BARCODE_WIDTH_RATIO = 0.92; // fraction of contentWidth the barcode may use
 
 interface PdfOptions {
   sealsPerPage: number;
@@ -77,7 +82,7 @@ export async function generatePdf(
         const x = CONTENT_START_X_MM + col * (SEAL_WIDTH_MM + COLUMN_GAP_MM);
         const y = MARGIN_MM + row * SEAL_HEIGHT_MM;
 
-        renderSeal(doc, seal, x, y, options.showBorders);
+        renderSeal(doc, seal, x, y, options.showBorders, options.barcodeType);
         sealIndex++;
       }
       if (sealIndex >= seals.length) break;
@@ -98,7 +103,8 @@ function renderSeal(
   seal: Seal,
   x: number,
   y: number,
-  showBorders: boolean
+  showBorders: boolean,
+  barcodeType: 'numeric' | 'code128'
 ): void {
   // Draw border if requested — solid black, thick enough for a clean cut line.
   if (showBorders) {
@@ -127,14 +133,64 @@ function renderSeal(
 
   doc.addImage(LEVE_LOGO_BASE64, 'PNG', logoX, logoY, logoWidthMm, logoHeightMm);
 
-  // Content area starts right after the logo zone. The code and convenio
-  // are centered within THIS area only (never within the full seal width),
-  // so they never invade the logo zone regardless of code length.
+  // Content area starts right after the logo zone. The code, the optional
+  // barcode graphic, and the convenio are all centered only within THIS
+  // area, so they never invade the logo zone regardless of code length.
   const contentStartX = x + LOGO_ZONE_WIDTH_MM;
   const contentWidth = SEAL_WIDTH_MM - LOGO_ZONE_WIDTH_MM - CONTENT_PADDING_MM;
   const contentCenterX = contentStartX + contentWidth / 2;
 
-  // Add codigo (centered within content area)
+  // Try to generate the scannable barcode graphic when 'code128' is
+  // selected. Returns null for 'numeric' (by design — no graphic, just
+  // the plain digits) or if generation fails for any reason.
+  const barcodeImage = generateBarcode(seal.codigo, barcodeType);
+
+  if (barcodeImage) {
+    // --- Layout WITH barcode graphic: code on top, barcode strip below,
+    //     convenio (if any) at the bottom. ---
+    doc.setFontSize(13);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(0, 0, 0);
+    const codigoY = y + 7;
+    doc.text(seal.codigo, contentCenterX, codigoY, {
+      align: 'center',
+      maxWidth: contentWidth,
+    });
+
+    // Size the barcode to fit the content area without distorting its
+    // aspect ratio, capped at BARCODE_MAX_HEIGHT_MM tall.
+    const naturalAspect = barcodeImage.width / barcodeImage.height;
+    let barcodeWidthMm = contentWidth * BARCODE_WIDTH_RATIO;
+    let barcodeHeightMm = barcodeWidthMm / naturalAspect;
+    if (barcodeHeightMm > BARCODE_MAX_HEIGHT_MM) {
+      barcodeHeightMm = BARCODE_MAX_HEIGHT_MM;
+      barcodeWidthMm = barcodeHeightMm * naturalAspect;
+    }
+    const barcodeX = contentCenterX - barcodeWidthMm / 2;
+    const barcodeY = codigoY + 2;
+    doc.addImage(barcodeImage.dataUrl, 'PNG', barcodeX, barcodeY, barcodeWidthMm, barcodeHeightMm);
+
+    if (seal.convenio) {
+      doc.setFontSize(6);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(0, 0, 0);
+      const convenioY = barcodeY + barcodeHeightMm + 3.5;
+
+      let convenio = seal.convenio;
+      if (convenio.length > 40) {
+        convenio = convenio.substring(0, 37) + '...';
+      }
+
+      doc.text(convenio, contentCenterX, convenioY, {
+        align: 'center',
+        maxWidth: contentWidth,
+      });
+    }
+    return;
+  }
+
+  // --- Layout WITHOUT barcode graphic ('numeric' mode): the original,
+  //     vertically-centered code + convenio layout. ---
   doc.setFontSize(16);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(0, 0, 0);
@@ -144,15 +200,12 @@ function renderSeal(
     maxWidth: contentWidth,
   });
 
-  // Add convenio if present (centered within content area, smaller, bold
-  // for better visibility/legibility when printed)
   if (seal.convenio) {
     doc.setFontSize(6);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(0, 0, 0);
     const convenioY = codigoY + 5;
 
-    // Truncate long text to fit
     let convenio = seal.convenio;
     if (convenio.length > 40) {
       convenio = convenio.substring(0, 37) + '...';
@@ -168,7 +221,11 @@ function renderSeal(
 /**
  * Generate PDF preview for display
  */
-export async function generatePdfPreview(seals: Seal[], showBorders: boolean = true): Promise<Blob> {
+export async function generatePdfPreview(
+  seals: Seal[],
+  showBorders: boolean = true,
+  barcodeType: 'numeric' | 'code128' = 'code128'
+): Promise<Blob> {
   const doc = new jsPDF({
     orientation: 'portrait',
     unit: 'mm',
@@ -196,7 +253,7 @@ export async function generatePdfPreview(seals: Seal[], showBorders: boolean = t
         const x = CONTENT_START_X_MM + col * (SEAL_WIDTH_MM + COLUMN_GAP_MM);
         const y = MARGIN_MM + row * SEAL_HEIGHT_MM;
 
-        renderSeal(doc, seal, x, y, showBorders);
+        renderSeal(doc, seal, x, y, showBorders, barcodeType);
         sealIndex++;
       }
       if (sealIndex >= seals.length) break;

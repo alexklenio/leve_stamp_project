@@ -153,6 +153,7 @@ export default function App() {
                   zoom={zoom}
                   currentPage={currentPage}
                   onPageChange={setCurrentPage}
+                  barcodeType={barcodeType}
                 />
               </div>
             ) : (
