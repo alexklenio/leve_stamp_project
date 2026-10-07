@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { generateSuspensionPdf, SuspensionData } from '../utils/generateSuspensionPdf';
+import { LEVE_LOGO_BASE64 } from '../assets/leveLogoBase64';
 
 interface SuspensionFormProps {
   onBack: () => void;
@@ -41,27 +42,22 @@ function Field({
   label,
   value,
   onChange,
-  placeholder,
   type = 'text',
-  required = true,
 }: {
   label: string;
   value: string;
   onChange: (v: string) => void;
-  placeholder?: string;
   type?: string;
-  required?: boolean;
 }) {
   return (
     <div>
       <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-        {label} {required && <span className="text-red-500">*</span>}
+        {label}
       </label>
       <input
         type={type}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
         className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-leve-blue"
       />
     </div>
@@ -109,16 +105,7 @@ export default function SuspensionForm({ onBack }: SuspensionFormProps) {
     testemunha2Data: toBrDate(form.testemunha2DataIso),
   });
 
-  const requiredFilled =
-    form.nomeEmpregado && form.ctps && form.funcao && form.setorLotacao &&
-    form.dataCometimentoIso && form.tipoAto && form.letraArtigo &&
-    form.dataOcorridoIso && form.resumoSuspensao && form.dataDocumentoIso;
-
   const handleExport = async () => {
-    if (!requiredFilled) {
-      alert('Preencha todos os campos obrigatórios (marcados com *) antes de exportar.');
-      return;
-    }
     setIsExporting(true);
     try {
       await generateSuspensionPdf(buildData());
@@ -155,14 +142,18 @@ export default function SuspensionForm({ onBack }: SuspensionFormProps) {
           {/* Dados do Funcionário */}
           <div className="bg-white rounded-lg shadow-md p-6">
             <h3 className="text-lg font-bold text-gray-800 mb-4">Dados do Funcionário</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
               <div className="sm:col-span-2">
-                <Field label="Nome do Empregado" value={form.nomeEmpregado} onChange={set('nomeEmpregado')} placeholder="ex: SHENIA ESTEFANIA CORDEIRO DOS SANTOS" />
+                <Field label="Nome do Empregado" value={form.nomeEmpregado} onChange={set('nomeEmpregado')} />
               </div>
-              <Field label="CTPS" value={form.ctps} onChange={set('ctps')} placeholder="ex: 1174968" />
-              <Field label="Série" value={form.serie} onChange={set('serie')} placeholder="ex: 1412 - PB" />
-              <Field label="Função" value={form.funcao} onChange={set('funcao')} placeholder="ex: OPERADOR DE ESTACIONAMENTO" />
-              <Field label="Setor / Lotação" value={form.setorLotacao} onChange={set('setorLotacao')} placeholder="ex: 0300 - ASSAÍ EPITÁCIO" />
+              <Field label="CTPS" value={form.ctps} onChange={set('ctps')} />
+              <Field label="Série" value={form.serie} onChange={set('serie')} />
+              <div className="sm:col-span-2">
+                <Field label="Função" value={form.funcao} onChange={set('funcao')} />
+              </div>
+              <div className="sm:col-span-2">
+                <Field label="Setor / Lotação" value={form.setorLotacao} onChange={set('setorLotacao')} />
+              </div>
             </div>
           </div>
 
@@ -173,13 +164,13 @@ export default function SuspensionForm({ onBack }: SuspensionFormProps) {
               <Field label="Dias de Suspensão" value={form.diasSuspensao} onChange={set('diasSuspensao')} type="number" />
               <Field label="Data do Cometimento (desde)" value={form.dataCometimentoIso} onChange={set('dataCometimentoIso')} type="date" />
               <div className="sm:col-span-2">
-                <Field label="Tipo de Ato / Procedimento" value={form.tipoAto} onChange={set('tipoAto')} placeholder="ex: MAU PROCEDIMENTO" />
+                <Field label="Tipo de Ato / Procedimento" value={form.tipoAto} onChange={set('tipoAto')} />
               </div>
-              <Field label="Letra do Artigo 482" value={form.letraArtigo} onChange={set('letraArtigo')} placeholder="ex: B" />
+              <Field label="Letra do Artigo 482" value={form.letraArtigo} onChange={set('letraArtigo')} />
               <Field label="Data de Ocorrência do Fato" value={form.dataOcorridoIso} onChange={set('dataOcorridoIso')} type="date" />
-              <Field label="Data de Retorno" value={form.dataRetornoIso} onChange={set('dataRetornoIso')} type="date" required={false} />
+              <Field label="Data de Retorno" value={form.dataRetornoIso} onChange={set('dataRetornoIso')} type="date" />
               <div className="sm:col-span-2">
-                <Field label="Resumo da Suspensão" value={form.resumoSuspensao} onChange={set('resumoSuspensao')} placeholder="ex: Falta sem justificativa" />
+                <Field label="Resumo da Suspensão" value={form.resumoSuspensao} onChange={set('resumoSuspensao')} />
               </div>
             </div>
           </div>
@@ -201,10 +192,10 @@ export default function SuspensionForm({ onBack }: SuspensionFormProps) {
           <div className="bg-white rounded-lg shadow-md p-6">
             <h3 className="text-lg font-bold text-gray-800 mb-4">Testemunhas (opcional)</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Field label="Testemunha 1 — Nome" value={form.testemunha1Nome} onChange={set('testemunha1Nome')} required={false} />
-              <Field label="Testemunha 1 — Data" value={form.testemunha1DataIso} onChange={set('testemunha1DataIso')} type="date" required={false} />
-              <Field label="Testemunha 2 — Nome" value={form.testemunha2Nome} onChange={set('testemunha2Nome')} required={false} />
-              <Field label="Testemunha 2 — Data" value={form.testemunha2DataIso} onChange={set('testemunha2DataIso')} type="date" required={false} />
+              <Field label="Testemunha 1 — Nome" value={form.testemunha1Nome} onChange={set('testemunha1Nome')} />
+              <Field label="Testemunha 1 — Data" value={form.testemunha1DataIso} onChange={set('testemunha1DataIso')} type="date" />
+              <Field label="Testemunha 2 — Nome" value={form.testemunha2Nome} onChange={set('testemunha2Nome')} />
+              <Field label="Testemunha 2 — Data" value={form.testemunha2DataIso} onChange={set('testemunha2DataIso')} type="date" />
             </div>
           </div>
 
@@ -218,11 +209,6 @@ export default function SuspensionForm({ onBack }: SuspensionFormProps) {
             </svg>
             {isExporting ? 'Gerando PDF...' : 'Exportar PDF'}
           </button>
-          {!requiredFilled && (
-            <p className="text-xs text-amber-600 -mt-3">
-              Preencha os campos marcados com * para habilitar a exportação.
-            </p>
-          )}
         </div>
 
         {/* Right: Live Preview */}
@@ -230,20 +216,16 @@ export default function SuspensionForm({ onBack }: SuspensionFormProps) {
           <div className="bg-white rounded-lg shadow-md p-6">
             <h2 className="text-lg font-bold text-gray-800 mb-4">Pré-visualização</h2>
             <div className="border border-gray-300 rounded-md p-6 text-[13px] leading-relaxed text-gray-900 bg-white">
-              <div className="flex items-start justify-between mb-4">
+              <div className="flex items-start justify-between mb-4 gap-4">
                 <h3 className="font-bold text-base">CARTA DE SUSPENSÃO DISCIPLINAR</h3>
-                <div className="bg-leve-blue text-white text-[10px] font-bold px-2 py-1 rounded">
-                  LEVÉ
-                </div>
+                <img src={LEVE_LOGO_BASE64} alt="LEVÉ Mobilidade" className="h-8 w-auto flex-shrink-0" />
               </div>
               <hr className="mb-3 border-leve-blue" />
 
               <p>
                 <span className="font-normal">Sra./Sr.: </span>
                 <span className="font-bold">{data.nomeEmpregado || '—'}</span>
-              </p>
-              <p>
-                <span className="font-normal">CTPS: </span>
+                <span className="font-normal ml-4">CTPS: </span>
                 <span className="font-bold">{data.ctps || '—'}</span>
                 <span className="font-normal ml-4">SÉRIE: </span>
                 <span className="font-bold">{data.serie || '—'}</span>

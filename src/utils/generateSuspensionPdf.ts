@@ -1,5 +1,5 @@
 import jsPDF from 'jspdf';
-import { LEVE_LOGO_WHITE_BASE64, LEVE_LOGO_WHITE_ASPECT_RATIO } from '../assets/leveLogoBase64';
+import { LEVE_LOGO_BASE64, LEVE_LOGO_ASPECT_RATIO } from '../assets/leveLogoBase64';
 
 export interface SuspensionData {
   nomeEmpregado: string;
@@ -49,28 +49,23 @@ export async function generateSuspensionPdf(data: SuspensionData): Promise<void>
 
   let cursorY = MARGIN_MM;
 
-  // --- Header: title + LEVÉ logo badge top-right ---
-  const badgeW = 26;
-  const badgeH = 13;
-  const badgeX = PAGE_WIDTH_MM - MARGIN_MM - badgeW;
-  const badgeY = cursorY;
-  doc.setFillColor(0, 51, 102); // leve-blue
-  doc.roundedRect(badgeX, badgeY, badgeW, badgeH, 1.5, 1.5, 'F');
+  // --- Header: title + real LEVÉ logo (full color) top-right ---
+  const logoAreaW = 30;
+  const logoAreaH = 14;
+  const logoAreaX = PAGE_WIDTH_MM - MARGIN_MM - logoAreaW;
+  const logoAreaY = cursorY;
 
-  const logoPad = 2.5;
-  const logoMaxW = badgeW - logoPad * 2;
-  const logoMaxH = badgeH - logoPad * 2;
-  let logoW = logoMaxW;
-  let logoH = logoW / LEVE_LOGO_WHITE_ASPECT_RATIO;
-  if (logoH > logoMaxH) {
-    logoH = logoMaxH;
-    logoW = logoH * LEVE_LOGO_WHITE_ASPECT_RATIO;
+  let logoW = logoAreaW;
+  let logoH = logoW / LEVE_LOGO_ASPECT_RATIO;
+  if (logoH > logoAreaH) {
+    logoH = logoAreaH;
+    logoW = logoH * LEVE_LOGO_ASPECT_RATIO;
   }
   doc.addImage(
-    LEVE_LOGO_WHITE_BASE64,
+    LEVE_LOGO_BASE64,
     'PNG',
-    badgeX + (badgeW - logoW) / 2,
-    badgeY + (badgeH - logoH) / 2,
+    logoAreaX + (logoAreaW - logoW) / 2,
+    logoAreaY + (logoAreaH - logoH) / 2,
     logoW,
     logoH
   );
@@ -80,7 +75,7 @@ export async function generateSuspensionPdf(data: SuspensionData): Promise<void>
   doc.setTextColor(20, 20, 20);
   doc.text('CARTA DE SUSPENSÃO DISCIPLINAR', MARGIN_MM, cursorY + 8);
 
-  cursorY += badgeH + 4;
+  cursorY += logoAreaH + 4;
   doc.setDrawColor(0, 51, 102);
   doc.setLineWidth(0.8);
   doc.line(MARGIN_MM, cursorY, PAGE_WIDTH_MM - MARGIN_MM, cursorY);
@@ -99,20 +94,27 @@ export async function generateSuspensionPdf(data: SuspensionData): Promise<void>
     doc.text(value || '—', MARGIN_MM + labelW + 1.5, y);
   };
 
-  infoLine('Sra./Sr.:', data.nomeEmpregado, cursorY);
+  // Nome, CTPS and Série all on the same line.
+  let xCursor = MARGIN_MM;
   doc.setFont('helvetica', 'normal');
-  doc.text(
-    `CTPS: `,
-    MARGIN_MM,
-    (cursorY += 6)
-  );
+  doc.text('Sra./Sr.:', xCursor, cursorY);
+  xCursor += doc.getTextWidth('Sra./Sr.: ') + 1.5;
   doc.setFont('helvetica', 'bold');
-  doc.text(data.ctps || '—', MARGIN_MM + doc.getTextWidth('CTPS: '), cursorY);
+  doc.text(data.nomeEmpregado || '—', xCursor, cursorY);
+  xCursor += doc.getTextWidth(data.nomeEmpregado || '—') + 6;
+
   doc.setFont('helvetica', 'normal');
-  const serieLabelX = MARGIN_MM + 60;
-  doc.text('SÉRIE:', serieLabelX, cursorY);
+  doc.text('CTPS:', xCursor, cursorY);
+  xCursor += doc.getTextWidth('CTPS: ') + 1.5;
   doc.setFont('helvetica', 'bold');
-  doc.text(data.serie || '—', serieLabelX + doc.getTextWidth('SÉRIE: '), cursorY);
+  doc.text(data.ctps || '—', xCursor, cursorY);
+  xCursor += doc.getTextWidth(data.ctps || '—') + 6;
+
+  doc.setFont('helvetica', 'normal');
+  doc.text('SÉRIE:', xCursor, cursorY);
+  xCursor += doc.getTextWidth('SÉRIE: ') + 1.5;
+  doc.setFont('helvetica', 'bold');
+  doc.text(data.serie || '—', xCursor, cursorY);
 
   cursorY += 6;
   infoLine('Função:', data.funcao, cursorY);
