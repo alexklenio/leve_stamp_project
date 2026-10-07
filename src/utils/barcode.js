@@ -1,35 +1,34 @@
 import JsBarcode from 'jsbarcode';
 /**
- * Generate a barcode as SVG string
+ * Generate a Code 128 barcode as a PNG data URL, plus its pixel dimensions
+ * (needed by the PDF export to size the image without distorting it).
+ *
+ * 'numeric' means "no scannable barcode graphic — just the plain number",
+ * which is the whole point of offering it as an alternative to 'code128'.
+ * So this returns null for 'numeric', and callers should simply not draw
+ * anything when they get null back.
  */
-export function generateBarcode(codigo, type = 'code128') {
+export function generateBarcode(codigo, type) {
+    if (type !== 'code128') {
+        return null;
+    }
     try {
         const canvas = document.createElement('canvas');
-        const format = type === 'code128' ? 'CODE128' : 'CODE128'; // Both use CODE128, just display differs
         JsBarcode(canvas, codigo, {
-            format: format,
-            width: 2,
+            format: 'CODE128',
+            width: 1.5,
             height: 40,
             displayValue: false,
-            margin: 0,
+            margin: 4,
         });
-        return canvas.toDataURL('image/png');
+        return {
+            dataUrl: canvas.toDataURL('image/png'),
+            width: canvas.width,
+            height: canvas.height,
+        };
     }
     catch (error) {
         console.error('Error generating barcode:', error);
-        return '';
+        return null;
     }
-}
-/**
- * Generate multiple barcodes for batch processing
- */
-export async function generateBarcodes(codigos, type = 'code128') {
-    const barcodes = new Map();
-    for (const codigo of codigos) {
-        const barcode = generateBarcode(codigo, type);
-        if (barcode) {
-            barcodes.set(codigo, barcode);
-        }
-    }
-    return barcodes;
 }
