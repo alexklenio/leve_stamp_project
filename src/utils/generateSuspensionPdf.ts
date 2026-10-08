@@ -213,18 +213,22 @@ export async function generateSuspensionPdf(data: SuspensionData): Promise<void>
     doc.setFontSize(9.5);
     doc.setFont('helvetica', 'normal');
     doc.text(label, MARGIN_MM + 3, atY);
+
+    // Signature line
     doc.line(MARGIN_MM + 27, atY + 1, MARGIN_MM + 95, atY + 1);
     if (nome) {
       doc.setFont('helvetica', 'bold');
       doc.text(nome, MARGIN_MM + 29, atY);
     }
 
+    // Date: fixed position right after the signature line
     doc.setFont('helvetica', 'normal');
-    doc.text('Data:', MARGIN_MM + 105, atY);
-    doc.line(MARGIN_MM + 118, atY + 1, RIGHT_EDGE_MM - 3, atY + 1);
+    doc.text('Data:', MARGIN_MM + 101, atY);
     if (dataTest) {
       doc.setFont('helvetica', 'bold');
-      doc.text(dataTest, MARGIN_MM + 120, atY);
+      doc.text(dataTest, MARGIN_MM + 113, atY);
+    } else {
+      doc.text('____/____/____', MARGIN_MM + 113, atY);
     }
   };
 

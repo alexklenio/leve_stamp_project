@@ -295,14 +295,23 @@ export default function SuspensionForm({ onBack }: SuspensionFormProps) {
                   <p className="text-xs mb-2">
                     Em caso de recusa do empregado a dar ciência nesta:
                   </p>
-                  <div className="flex justify-between text-xs mb-2">
-                    <span>Testemunha 1: {data.testemunha1Nome && <strong>{data.testemunha1Nome}</strong>}</span>
-                    <span>Data: {data.testemunha1Data && <strong>{data.testemunha1Data}</strong>}</span>
-                  </div>
-                  <div className="flex justify-between text-xs">
-                    <span>Testemunha 2: {data.testemunha2Nome && <strong>{data.testemunha2Nome}</strong>}</span>
-                    <span>Data: {data.testemunha2Data && <strong>{data.testemunha2Data}</strong>}</span>
-                  </div>
+                  {[
+                    { label: 'Testemunha 1:', nome: data.testemunha1Nome, dt: data.testemunha1Data },
+                    { label: 'Testemunha 2:', nome: data.testemunha2Nome, dt: data.testemunha2Data },
+                  ].map((t) => (
+                    <div key={t.label} className="flex items-end text-xs mb-3">
+                      <span className="w-[5.5rem] flex-shrink-0">{t.label}</span>
+                      {/* Signature line (fixed width) */}
+                      <div className="w-44 sm:w-56 flex-shrink-0 border-b border-black h-5 flex items-end px-1">
+                        {t.nome && <strong className="truncate">{t.nome}</strong>}
+                      </div>
+                      {/* Date: fixed position, right after the signature line */}
+                      <span className="ml-5 flex-shrink-0">Data:</span>
+                      <span className="ml-2 flex-shrink-0 w-28">
+                        {t.dt ? <strong>{t.dt}</strong> : '____/____/____'}
+                      </span>
+                    </div>
+                  ))}
                 </div>
               </div>
 
