@@ -11,6 +11,7 @@ export interface SuspensionData {
   dataCometimento: string; // dd/mm/yyyy
   tipoAto: string;
   letraArtigo: string;
+  motivo: string;
   dataOcorrido: string; // dd/mm/yyyy
   dataRetorno: string; // dd/mm/yyyy
   resumoSuspensao: string;
@@ -167,7 +168,7 @@ export async function generateSuspensionPdf(data: SuspensionData): Promise<void>
     `tendo em vista ter cometido o(s) ato(s) de ${(data.tipoAto || '—').toUpperCase()}, ` +
     `infringindo os dispositivos legais das letras "${data.letraArtigo || '—'}" do Artigo 482 da CLT ` +
     `Consolidação das Leis do Trabalho, resolvemos aplicar-lhe como medida disciplinar, a presente ` +
-    `SUSPENSÃO ${data.diasSuspensao || '1'} DIA(S) por falta sem justificativa, fato ocorrido em ` +
+    `SUSPENSÃO ${data.diasSuspensao || '1'} DIA(S) por ${data.motivo || '—'}, fato ocorrido em ` +
     `${data.dataOcorrido || '____/____/____'}.`;
 
   doc.setFont('helvetica', 'normal');

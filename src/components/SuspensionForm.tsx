@@ -16,6 +16,7 @@ const EMPTY_DATA: SuspensionData = {
   dataCometimento: '',
   tipoAto: '',
   letraArtigo: '',
+  motivo: '',
   dataOcorrido: '',
   dataRetorno: '',
   resumoSuspensao: '',
@@ -92,6 +93,7 @@ export default function SuspensionForm({ onBack }: SuspensionFormProps) {
     dataCometimento: toBrDate(form.dataCometimentoIso),
     tipoAto: form.tipoAto,
     letraArtigo: form.letraArtigo,
+    motivo: form.motivo,
     dataOcorrido: toBrDate(form.dataOcorridoIso),
     dataRetorno: toBrDate(form.dataRetornoIso),
     resumoSuspensao: form.resumoSuspensao,
@@ -167,6 +169,9 @@ export default function SuspensionForm({ onBack }: SuspensionFormProps) {
                 <Field label="Tipo de Ato / Procedimento" value={form.tipoAto} onChange={set('tipoAto')} />
               </div>
               <Field label="Letra do Artigo 482" value={form.letraArtigo} onChange={set('letraArtigo')} />
+              <div className="sm:col-span-2">
+                <Field label="Motivo da Suspensão" value={form.motivo} onChange={set('motivo')} />
+              </div>
               <Field label="Data de Ocorrência do Fato" value={form.dataOcorridoIso} onChange={set('dataOcorridoIso')} type="date" />
               <Field label="Data de Retorno" value={form.dataRetornoIso} onChange={set('dataRetornoIso')} type="date" />
               <div className="sm:col-span-2">
@@ -259,8 +264,8 @@ export default function SuspensionForm({ onBack }: SuspensionFormProps) {
                     infringindo os dispositivos legais das letras "
                     <span className="font-semibold">{data.letraArtigo || '—'}</span>" do Artigo 482
                     da CLT Consolidação das Leis do Trabalho, resolvemos aplicar-lhe como medida
-                    disciplinar, a presente SUSPENSÃO {data.diasSuspensao || '1'} DIA(S) por falta
-                    sem justificativa, fato ocorrido em{' '}
+                    disciplinar, a presente SUSPENSÃO {data.diasSuspensao || '1'} DIA(S) por{' '}
+                    <span className="font-semibold">{data.motivo || '—'}</span>, fato ocorrido em{' '}
                     <span className="font-semibold">{data.dataOcorrido || '____/____/____'}</span>.
                   </p>
 
