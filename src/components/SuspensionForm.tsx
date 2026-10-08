@@ -215,87 +215,100 @@ export default function SuspensionForm({ onBack }: SuspensionFormProps) {
         <div className="lg:sticky lg:top-6 self-start">
           <div className="bg-white rounded-lg shadow-md p-6">
             <h2 className="text-lg font-bold text-gray-800 mb-4">Pré-visualização</h2>
-            <div className="border border-gray-300 rounded-md p-6 text-[13px] leading-relaxed text-gray-900 bg-white">
-              <div className="flex items-start justify-between mb-4 gap-4">
-                <h3 className="font-bold text-base">CARTA DE SUSPENSÃO DISCIPLINAR</h3>
-                <img src={LEVE_LOGO_BASE64} alt="LEVÉ Mobilidade" className="h-8 w-auto flex-shrink-0" />
-              </div>
-              <hr className="mb-3 border-leve-blue" />
-
-              <p>
-                <span className="font-normal">Sra./Sr.: </span>
-                <span className="font-bold">{data.nomeEmpregado || '—'}</span>
-                <span className="font-normal ml-4">CTPS: </span>
-                <span className="font-bold">{data.ctps || '—'}</span>
-                <span className="font-normal ml-4">SÉRIE: </span>
-                <span className="font-bold">{data.serie || '—'}</span>
-              </p>
-              <p>
-                <span className="font-normal">Função: </span>
-                <span className="font-bold">{data.funcao || '—'}</span>
-              </p>
-              <p className="mb-3">
-                <span className="font-normal">Setor / Lotação: </span>
-                <span className="font-bold">{data.setorLotacao || '—'}</span>
-              </p>
-
-              <hr className="mb-3 border-gray-200" />
-
-              <p className="font-bold mb-2">
-                Referente à: Suspensão {data.diasSuspensao || '1'} dia(s)
-              </p>
-              <p className="text-justify mb-3">
-                Ao Sr. Empregado desta empresa, desde{' '}
-                <span className="font-semibold">{data.dataCometimento || '____/____/____'}</span>{' '}
-                tendo em vista ter cometido o(s) ato(s) de{' '}
-                <span className="font-semibold">{(data.tipoAto || '—').toUpperCase()}</span>,
-                infringindo os dispositivos legais das letras "
-                <span className="font-semibold">{data.letraArtigo || '—'}</span>" do Artigo 482
-                da CLT Consolidação das Leis do Trabalho, resolvemos aplicar-lhe como medida
-                disciplinar, a presente SUSPENSÃO {data.diasSuspensao || '1'} DIA(S) por falta
-                sem justificativa, fato ocorrido em{' '}
-                <span className="font-semibold">{data.dataOcorrido || '____/____/____'}</span>.
-              </p>
-
-              <p>
-                <span className="font-normal">Retornar em: </span>
-                <span className="font-bold">{data.dataRetorno || '—'}</span>
-              </p>
-              <p className="mb-4">
-                <span className="font-normal">Resumo da Suspensão: </span>
-                <span className="font-bold">{data.resumoSuspensao || '—'}</span>
-              </p>
-
-              <p className="text-center mb-4">
-                {data.local || 'Recife'}
-                {(() => {
-                  const [d, m, y] = (data.dataDocumento || '').split('/');
-                  const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-                  const mi = parseInt(m, 10);
-                  const mesExt = !isNaN(mi) ? meses[mi - 1] : '____';
-                  return `, ${d || '__'} de ${mesExt} de ${y || '____'}.`;
-                })()}
-              </p>
-
-              <p className="text-center font-bold">{data.razaoSocial || '—'}</p>
-              <p className="text-center mb-6">{data.cnpj || '—'}</p>
-
-              <div className="text-center mb-6">
-                <div className="border-t border-gray-400 w-48 mx-auto mb-1" />
-                <p className="font-bold">{data.nomeEmpregado || '—'}</p>
+            <div className="text-[12px] leading-relaxed text-gray-900 bg-white">
+              {/* Box A — title (centered) + logo */}
+              <div className="relative border border-black flex items-center justify-center py-3 mb-1">
+                <h3 className="font-bold text-sm text-center">CARTA DE SUSPENSÃO DISCIPLINAR</h3>
+                <img
+                  src={LEVE_LOGO_BASE64}
+                  alt="LEVÉ Mobilidade"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-auto"
+                />
               </div>
 
-              <p className="text-xs text-gray-600 mb-2">
-                Em caso de recusa do empregado a dar ciência nesta:
+              {/* Box B — letter body */}
+              <div className="border border-black">
+                <div className="px-3 py-2 border-b border-black">
+                  <p>
+                    <span>Sra./Sr.: </span>
+                    <span className="font-bold">{data.nomeEmpregado || '—'}</span>
+                    <span className="ml-4">CTPS: </span>
+                    <span className="font-bold">{data.ctps || '—'}</span>
+                    <span className="ml-4">SÉRIE: </span>
+                    <span className="font-bold">{data.serie || '—'}</span>
+                  </p>
+                  <p>
+                    <span>Função: </span>
+                    <span className="font-bold">{data.funcao || '—'}</span>
+                  </p>
+                  <p>
+                    <span>Setor / Lotação: </span>
+                    <span className="font-bold">{data.setorLotacao || '—'}</span>
+                  </p>
+                </div>
+
+                <div className="px-3 py-3">
+                  <p className="font-bold mb-2">
+                    Referente à: Suspensão {data.diasSuspensao || '1'} dia(s)
+                  </p>
+                  <p className="mb-3">
+                    Ao Sr. Empregado desta empresa, desde{' '}
+                    <span className="font-semibold">{data.dataCometimento || '____/____/____'}</span>{' '}
+                    tendo em vista ter cometido o(s) ato(s) de{' '}
+                    <span className="font-semibold">{(data.tipoAto || '—').toUpperCase()}</span>,
+                    infringindo os dispositivos legais das letras "
+                    <span className="font-semibold">{data.letraArtigo || '—'}</span>" do Artigo 482
+                    da CLT Consolidação das Leis do Trabalho, resolvemos aplicar-lhe como medida
+                    disciplinar, a presente SUSPENSÃO {data.diasSuspensao || '1'} DIA(S) por falta
+                    sem justificativa, fato ocorrido em{' '}
+                    <span className="font-semibold">{data.dataOcorrido || '____/____/____'}</span>.
+                  </p>
+
+                  <p>
+                    <span>Retornar em: </span>
+                    <span className="font-bold">{data.dataRetorno || '—'}</span>
+                  </p>
+                  <p className="mb-4">
+                    <span>Resumo da Suspensão: </span>
+                    <span className="font-bold">{data.resumoSuspensao || '—'}</span>
+                  </p>
+
+                  <p className="text-center mb-4">
+                    {data.local || 'Recife'}
+                    {(() => {
+                      const [d, m, y] = (data.dataDocumento || '').split('/');
+                      const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+                      const mi = parseInt(m, 10);
+                      const mesExt = !isNaN(mi) ? meses[mi - 1] : '____';
+                      return `, ${d || '__'} de ${mesExt} de ${y || '____'}.`;
+                    })()}
+                  </p>
+
+                  <p className="text-center font-bold">{data.razaoSocial || '—'}</p>
+                  <p className="text-center mb-5">{data.cnpj || '—'}</p>
+
+                  <div className="text-center mb-4">
+                    <div className="border-t border-black w-48 mx-auto mb-1" />
+                    <p className="font-bold">{data.nomeEmpregado || '—'}</p>
+                  </div>
+
+                  <p className="text-xs mb-2">
+                    Em caso de recusa do empregado a dar ciência nesta:
+                  </p>
+                  <div className="flex justify-between text-xs mb-2">
+                    <span>Testemunha 1: {data.testemunha1Nome && <strong>{data.testemunha1Nome}</strong>}</span>
+                    <span>Data: {data.testemunha1Data && <strong>{data.testemunha1Data}</strong>}</span>
+                  </div>
+                  <div className="flex justify-between text-xs">
+                    <span>Testemunha 2: {data.testemunha2Nome && <strong>{data.testemunha2Nome}</strong>}</span>
+                    <span>Data: {data.testemunha2Data && <strong>{data.testemunha2Data}</strong>}</span>
+                  </div>
+                </div>
+              </div>
+
+              <p className="text-[10px] text-gray-500 mt-2 text-center">
+                O PDF exportado inclui também a transcrição do Artigo 482 da CLT.
               </p>
-              <div className="flex justify-between text-xs mb-2">
-                <span>Testemunha 1: {data.testemunha1Nome && <strong>{data.testemunha1Nome}</strong>}</span>
-                <span>Data: {data.testemunha1Data && <strong>{data.testemunha1Data}</strong>}</span>
-              </div>
-              <div className="flex justify-between text-xs">
-                <span>Testemunha 2: {data.testemunha2Nome && <strong>{data.testemunha2Nome}</strong>}</span>
-                <span>Data: {data.testemunha2Data && <strong>{data.testemunha2Data}</strong>}</span>
-              </div>
             </div>
           </div>
         </div>
