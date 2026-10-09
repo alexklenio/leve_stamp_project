@@ -1,6 +1,6 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useMemo } from 'react';
 import { Seal as SealType } from '../utils/parseTxt';
-import JsBarcode from 'jsbarcode';
+import { generateBarcode } from '../utils/barcode';
 import { LEVE_LOGO_BASE64 } from '../assets/leveLogoBase64';
 
 interface SealProps {
@@ -9,33 +9,23 @@ interface SealProps {
   barcodeType?: 'numeric' | 'code128';
 }
 
-export const Seal: React.FC<SealProps> = ({ 
-  seal, 
-  showBorders = true
+export const Seal: React.FC<SealProps> = ({
+  seal,
+  showBorders = true,
+  barcodeType = 'code128',
 }) => {
-  const barcodeRef = useRef<SVGSVGElement>(null);
-
-  useEffect(() => {
-    if (barcodeRef.current) {
-      try {
-        JsBarcode(barcodeRef.current, seal.codigo, {
-          format: 'CODE128',
-          width: 1.5,
-          height: 30,
-          displayValue: false,
-          margin: 0,
-        });
-      } catch (error) {
-        console.error('Error rendering barcode:', error);
-      }
-    }
-  }, [seal.codigo]);
+  // The preview uses the exact same barcode image the PDF export uses
+  // (generateBarcode returns null for 'numeric', i.e. "no bars, digits only").
+  const barcode = useMemo(
+    () => generateBarcode(seal.codigo, barcodeType),
+    [seal.codigo, barcodeType]
+  );
 
   // Seal dimensions: 7cm × 2.5cm = 198.4px × 70.9px at 72 DPI
   const sealWidth = 198; // pixels for 7cm
   const sealHeight = 71; // pixels for 2.5cm
 
-  // Fixed logo zone (matches the 20mm / 70mm reserved zone used in the PDF
+  // Fixed logo zone (matches the 27mm / 70mm reserved zone used in the PDF
   // export, generatePdf.ts) so the on-screen preview and the exported PDF
   // line up exactly and the code never overlaps the logo.
   const logoZoneWidth = Math.round(sealWidth * (27 / 70)); // ~76px
@@ -61,14 +51,24 @@ export const Seal: React.FC<SealProps> = ({
           />
         </div>
 
-        {/* Code and Convenio */}
+        {/* Code, optional barcode graphic, and Convenio */}
         <div className="flex-1 flex flex-col items-center justify-center gap-0.5 min-w-0">
           <div
             className="font-bold text-black text-center leading-none"
-            style={{ fontSize: '14px' }}
+            style={{ fontSize: barcode ? '12px' : '14px' }}
           >
             {seal.codigo}
           </div>
+
+          {barcode && (
+            // 20px ≈ 7mm tall: same height cap the PDF export applies.
+            <img
+              src={barcode.dataUrl}
+              alt={`Código de barras ${seal.codigo}`}
+              style={{ height: '20px', width: 'auto', maxWidth: '100%' }}
+            />
+          )}
+
           {seal.convenio && (
             <div
               className="font-bold text-black text-center leading-none"
@@ -86,10 +86,10 @@ export const Seal: React.FC<SealProps> = ({
 };
 
 // Preview component for tooltip/modal
-export const SealPreview: React.FC<SealProps> = ({ seal, showBorders }) => {
+export const SealPreview: React.FC<SealProps> = ({ seal, showBorders, barcodeType }) => {
   return (
     <div className="bg-white p-4 rounded-lg shadow-lg">
-      <Seal seal={seal} showBorders={showBorders} />
+      <Seal seal={seal} showBorders={showBorders} barcodeType={barcodeType} />
     </div>
   );
 };
