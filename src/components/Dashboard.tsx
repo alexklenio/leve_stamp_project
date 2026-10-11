@@ -39,7 +39,7 @@ function ToolCard({ title, description, icon, onClick, disabled }: ToolCardProps
 
 export default function Dashboard({ onSelectTool }: DashboardProps) {
   return (
-    <div className="max-w-7xl mx-auto p-6">
+    <div className="max-w-7xl mx-auto px-6 pb-6">
       <h1 className="text-xl font-bold text-gray-800 mb-1">Ferramentas do Setor</h1>
       <p className="text-sm text-gray-500 mb-6">Selecione uma ferramenta para começar</p>
 
