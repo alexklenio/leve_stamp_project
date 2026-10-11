@@ -46,7 +46,7 @@ export default function App() {
       {/* Footer */}
       <footer className="bg-gray-800 text-gray-400 text-center py-4">
         <p className="text-sm">
-          Solução rápida e confiável — Ferramentas do Setor de Auditoria LEVÉ Mobilidade
+          Auditoria Leve Mobilidade - Todos os direitos reservados - Desenvolvido por Alex Lopes
         </p>
       </footer>
     </div>

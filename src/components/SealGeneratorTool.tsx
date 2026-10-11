@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { UploadBox } from './UploadBox';
 import { SealGrid } from './SealGrid';
 import { Toolbar } from './Toolbar';
@@ -9,7 +9,8 @@ interface SealGeneratorToolProps {
 }
 
 export default function SealGeneratorTool({ onBack }: SealGeneratorToolProps) {
-  const [seals, setSeals] = useState<Seal[]>([]);
+  // Seals exactly as read from the TXT (without the convênio field applied).
+  const [rawSeals, setRawSeals] = useState<Seal[]>([]);
   const [zoom, setZoom] = useState(100);
   const [showBorders, setShowBorders] = useState(true);
   const [barcodeType, setBarcodeType] = useState<'numeric' | 'code128'>('code128');
@@ -18,21 +19,27 @@ export default function SealGeneratorTool({ onBack }: SealGeneratorToolProps) {
   const [convenio, setConvenio] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
+  // Seals actually shown and exported. The convênio typed in the field is
+  // applied here, so inserting/changing it updates the preview and the PDF
+  // immediately — no need to upload the TXT again. A convênio that comes
+  // inside the TXT line itself is kept as is.
+  const seals = useMemo<Seal[]>(() => {
+    const convenioTrimmed = convenio.trim();
+    if (!convenioTrimmed) return rawSeals;
+    return rawSeals.map((seal) => ({
+      ...seal,
+      convenio: seal.convenio || convenioTrimmed,
+    }));
+  }, [rawSeals, convenio]);
+
   const handleFileUpload = (content: string) => {
     setIsLoading(true);
     try {
-      let parsedSeals = parseTxt(content);
-
-      if (convenio && parsedSeals.length > 0) {
-        parsedSeals = parsedSeals.map(seal => ({
-          ...seal,
-          convenio: seal.convenio || convenio,
-        }));
-      }
+      const parsedSeals = parseTxt(content);
 
       const { valid, invalid } = validateSeals(parsedSeals);
 
-      setSeals(valid);
+      setRawSeals(valid);
       setCurrentPage(1);
 
       if (invalid.length > 0) {
@@ -41,7 +48,7 @@ export default function SealGeneratorTool({ onBack }: SealGeneratorToolProps) {
     } catch (error) {
       console.error('Erro ao processar arquivo:', error);
       alert('Erro ao processar o arquivo. Verifique o formato.');
-      setSeals([]);
+      setRawSeals([]);
     } finally {
       setIsLoading(false);
     }
@@ -67,9 +74,7 @@ export default function SealGeneratorTool({ onBack }: SealGeneratorToolProps) {
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* Left Sidebar */}
         <div className="lg:col-span-1 flex flex-col gap-6">
-          {/* Convenio Section — placed above the upload box so the user
-              fills it in BEFORE uploading, avoiding seals generated
-              without a convênio by mistake. */}
+          {/* Convenio Section — applied live to every seal (preview and PDF). */}
           <div className="bg-white rounded-lg shadow-md p-6">
             <h3 className="text-lg font-bold text-gray-800 mb-4">Convênio / Liberação</h3>
             <input
@@ -81,7 +86,7 @@ export default function SealGeneratorTool({ onBack }: SealGeneratorToolProps) {
               disabled={isLoading}
             />
             <p className="text-xs text-gray-500 mt-1">
-              Preencha antes de carregar o TXT — será aplicado a todos os selos
+              Pode preencher ou alterar a qualquer momento — os selos são atualizados na hora
             </p>
           </div>
 
