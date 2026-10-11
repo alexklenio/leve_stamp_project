@@ -164,7 +164,7 @@ export default function SuspensionForm({ onBack }: SuspensionFormProps) {
             <h3 className="text-lg font-bold text-gray-800 mb-4">Dados da Suspensão</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Field label="Dias de Suspensão" value={form.diasSuspensao} onChange={set('diasSuspensao')} type="number" />
-              <Field label="Data do Cometimento (desde)" value={form.dataCometimentoIso} onChange={set('dataCometimentoIso')} type="date" />
+              <Field label="Data da Admissão" value={form.dataCometimentoIso} onChange={set('dataCometimentoIso')} type="date" />
               <div className="sm:col-span-2">
                 <Field label="Tipo de Ato / Procedimento" value={form.tipoAto} onChange={set('tipoAto')} />
               </div>
@@ -270,8 +270,8 @@ export default function SuspensionForm({ onBack }: SuspensionFormProps) {
                   </p>
 
                   <p>
-                    <span>Retornar em: </span>
-                    <span className="font-bold">{data.dataRetorno || '—'}</span>
+                    <span>Data de retorno: </span>
+                    <span className="font-bold">{data.dataRetorno || '_____/ _____/ _____'}</span>
                   </p>
                   <p className="mb-4">
                     <span>Resumo da Suspensão: </span>

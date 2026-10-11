@@ -161,7 +161,7 @@ export default function AdvertenciaForm({ onBack }: AdvertenciaFormProps) {
             <h3 className="text-lg font-bold text-gray-800 mb-4">Dados da Advertência</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Field label="Referente à" value={form.referente} onChange={set('referente')} />
-              <Field label="Data do Cometimento (desde)" value={form.dataCometimentoIso} onChange={set('dataCometimentoIso')} type="date" />
+              <Field label="Data da Admissão" value={form.dataCometimentoIso} onChange={set('dataCometimentoIso')} type="date" />
               <div className="sm:col-span-2">
                 <Field label="Tipo de Ato / Procedimento" value={form.tipoAto} onChange={set('tipoAto')} />
               </div>

@@ -177,7 +177,7 @@ export async function generateSuspensionPdf(data: SuspensionData): Promise<void>
   doc.text(paraLines, MARGIN_MM + 3, y, { lineHeightFactor: 1.4 });
   y += paraLines.length * 5.2 + 4;
 
-  infoLine('Retornar em:', data.dataRetorno, y);
+  infoLine('Data de retorno:', data.dataRetorno || '_____/ _____/ _____', y);
   y += 6;
   infoLine('Resumo da Suspensão:', data.resumoSuspensao, y);
   y += 10;
@@ -305,7 +305,7 @@ export async function generateSuspensionPdf(data: SuspensionData): Promise<void>
   doc.setFontSize(7.5);
   doc.setTextColor(140, 140, 140);
   doc.text(
-    'LEVE Mobilidade - ação disciplinar',
+    'LEVÉ Mobilidade — Documento gerado pela Ferramenta de Carta de Suspensão Disciplinar',
     PAGE_WIDTH_MM / 2,
     PAGE_HEIGHT_MM - 7,
     { align: 'center' }
