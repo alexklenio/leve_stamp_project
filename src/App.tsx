@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import Dashboard from './components/Dashboard';
 import SealGeneratorTool from './components/SealGeneratorTool';
+import DiscountSealTool from './components/DiscountSealTool';
 import SuspensionForm from './components/SuspensionForm';
 import AdvertenciaForm from './components/AdvertenciaForm';
 import { LEVE_LOGO_WHITE_BASE64, LEVE_LOGO_WHITE_ASPECT_RATIO } from './assets/leveLogoBase64';
 
-type View = 'dashboard' | 'selos' | 'suspensao' | 'advertencia';
+type View = 'dashboard' | 'selos' | 'desconto' | 'suspensao' | 'advertencia';
 
 export default function App() {
   const [view, setView] = useState<View>('dashboard');
@@ -39,6 +40,7 @@ export default function App() {
       <main className="flex-1 py-6">
         {view === 'dashboard' && <Dashboard onSelectTool={setView} />}
         {view === 'selos' && <SealGeneratorTool onBack={() => setView('dashboard')} />}
+        {view === 'desconto' && <DiscountSealTool onBack={() => setView('dashboard')} />}
         {view === 'suspensao' && <SuspensionForm onBack={() => setView('dashboard')} />}
         {view === 'advertencia' && <AdvertenciaForm onBack={() => setView('dashboard')} />}
       </main>

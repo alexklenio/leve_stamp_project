@@ -122,7 +122,7 @@ export async function generateSuspensionPdf(data) {
     const paraLines = doc.splitTextToSize(paragraph, CONTENT_WIDTH_MM - 6);
     doc.text(paraLines, MARGIN_MM + 3, y, { lineHeightFactor: 1.4 });
     y += paraLines.length * 5.2 + 4;
-    infoLine('Retornar em:', data.dataRetorno, y);
+    infoLine('Data de retorno:', data.dataRetorno || '_____/ _____/ _____', y);
     y += 6;
     infoLine('Resumo da Suspensão:', data.resumoSuspensao, y);
     y += 10;
@@ -229,7 +229,7 @@ export async function generateSuspensionPdf(data) {
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(7.5);
     doc.setTextColor(140, 140, 140);
-    doc.text('LEVE Mobilidade - ação disciplinar', PAGE_WIDTH_MM / 2, PAGE_HEIGHT_MM - 7, { align: 'center' });
+    doc.text('Leve Mobilidade — Documento gerado pelo setor de Auditoria', PAGE_WIDTH_MM / 2, PAGE_HEIGHT_MM - 7, { align: 'center' });
     const fileNameSafe = (data.nomeEmpregado || 'funcionario')
         .normalize('NFD')
         .replace(/[\u0300-\u036f]/g, '')
