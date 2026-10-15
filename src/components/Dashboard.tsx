@@ -66,6 +66,17 @@ export default function Dashboard({ onSelectTool }: DashboardProps) {
             </svg>
           }
         />
+        <ToolCard
+          title="Mais ferramentas"
+          description="Novas ferramentas do setor de auditoria serão adicionadas aqui."
+          onClick={() => {}}
+          disabled
+          icon={
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+          }
+        />
         </div>
 
         {/* Linha 2 — advertências e suspensão */}
@@ -97,21 +108,6 @@ export default function Dashboard({ onSelectTool }: DashboardProps) {
           icon={
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-            </svg>
-          }
-        />
-        </div>
-
-        {/* Linha 3 — em breve */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-        <ToolCard
-          title="Mais ferramentas"
-          description="Novas ferramentas do setor de auditoria serão adicionadas aqui."
-          onClick={() => {}}
-          disabled
-          icon={
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
             </svg>
           }
         />
