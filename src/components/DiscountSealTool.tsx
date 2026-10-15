@@ -31,7 +31,7 @@ export default function DiscountSealTool({ onBack }: DiscountSealToolProps) {
   const [sequenciaInicial, setSequenciaInicial] = useState('');
   const [quantidade, setQuantidade] = useState('');
   const [valor, setValor] = useState('');
-  const [descricao, setDescricao] = useState('');
+  const [convenio, setConvenio] = useState('');
 
   const [zoom, setZoom] = useState(100);
   const [showBorders, setShowBorders] = useState(true);
@@ -62,11 +62,11 @@ export default function DiscountSealTool({ onBack }: DiscountSealToolProps) {
       list.push({
         id: `desconto-${i}-${codigo}`,
         codigo,
-        convenio: descricao.trim() || undefined,
+        convenio: convenio.trim() || undefined,
       });
     }
     return list;
-  }, [ready, startNum, qtyNum, tipo, valor, descricao]);
+  }, [ready, startNum, qtyNum, tipo, valor, convenio]);
 
   const totalPages = Math.max(1, Math.ceil(seals.length / SEALS_PER_PAGE));
   const safePage = Math.min(currentPage, totalPages);
@@ -121,6 +121,22 @@ export default function DiscountSealTool({ onBack }: DiscountSealToolProps) {
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* Left sidebar: form */}
         <div className="lg:col-span-1 flex flex-col gap-6">
+          {/* Convenio Section — first in the form, same as the original seal generator.
+              Applied live to every seal (preview and PDF). */}
+          <div className="bg-white rounded-lg shadow-md p-6">
+            <h3 className="text-lg font-bold text-gray-800 mb-4">Convênio / Liberação</h3>
+            <input
+              type="text"
+              value={convenio}
+              onChange={(e) => setConvenio(e.target.value)}
+              placeholder="ex: LIBERAÇÃO GERÊNCIA - LT12082026"
+              className={inputClass}
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              Pode preencher ou alterar a qualquer momento — os selos são atualizados na hora
+            </p>
+          </div>
+
           <div className="bg-white rounded-lg shadow-md p-6">
             <h3 className="text-lg font-bold text-gray-800 mb-4">Dados dos Selos</h3>
             <div className="flex flex-col gap-4">
@@ -173,19 +189,6 @@ export default function DiscountSealTool({ onBack }: DiscountSealToolProps) {
                 />
                 <p className="text-xs text-gray-500 mt-1">
                   Zeros à esquerda são completados automaticamente.
-                </p>
-              </div>
-
-              <div>
-                <label className={labelClass}>Descrição (opcional)</label>
-                <input
-                  type="text"
-                  value={descricao}
-                  onChange={(e) => setDescricao(e.target.value)}
-                  className={inputClass}
-                />
-                <p className="text-xs text-gray-500 mt-1">
-                  Aparece abaixo do número em todos os selos.
                 </p>
               </div>
             </div>
