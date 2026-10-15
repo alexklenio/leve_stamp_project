@@ -2,11 +2,12 @@ import { useState } from 'react';
 import Dashboard from './components/Dashboard';
 import SealGeneratorTool from './components/SealGeneratorTool';
 import DiscountSealTool from './components/DiscountSealTool';
+import WhatsappAdvertenciaForm from './components/WhatsappAdvertenciaForm';
 import SuspensionForm from './components/SuspensionForm';
 import AdvertenciaForm from './components/AdvertenciaForm';
 import { LEVE_LOGO_WHITE_BASE64, LEVE_LOGO_WHITE_ASPECT_RATIO } from './assets/leveLogoBase64';
 
-type View = 'dashboard' | 'selos' | 'desconto' | 'suspensao' | 'advertencia';
+type View = 'dashboard' | 'selos' | 'desconto' | 'whatsapp' | 'suspensao' | 'advertencia';
 
 export default function App() {
   const [view, setView] = useState<View>('dashboard');
@@ -41,6 +42,7 @@ export default function App() {
         {view === 'dashboard' && <Dashboard onSelectTool={setView} />}
         {view === 'selos' && <SealGeneratorTool onBack={() => setView('dashboard')} />}
         {view === 'desconto' && <DiscountSealTool onBack={() => setView('dashboard')} />}
+        {view === 'whatsapp' && <WhatsappAdvertenciaForm onBack={() => setView('dashboard')} />}
         {view === 'suspensao' && <SuspensionForm onBack={() => setView('dashboard')} />}
         {view === 'advertencia' && <AdvertenciaForm onBack={() => setView('dashboard')} />}
       </main>

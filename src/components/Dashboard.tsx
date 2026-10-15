@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
 
 interface DashboardProps {
-  onSelectTool: (tool: 'selos' | 'desconto' | 'suspensao' | 'advertencia') => void;
+  onSelectTool: (tool: 'selos' | 'desconto' | 'whatsapp' | 'suspensao' | 'advertencia') => void;
 }
 
 interface ToolCardProps {
@@ -43,7 +43,9 @@ export default function Dashboard({ onSelectTool }: DashboardProps) {
       <h1 className="text-xl font-bold text-gray-800 mb-1">Ferramentas do Setor</h1>
       <p className="text-sm text-gray-500 mb-6">Selecione uma ferramenta para começar</p>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+      <div className="flex flex-col gap-5">
+        {/* Linha 1 — selos */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
         <ToolCard
           title="Gerador de Selos"
           description="Gere selos de liberação a partir de uma lista de códigos em TXT, com código de barras e exportação em PDF."
@@ -61,6 +63,20 @@ export default function Dashboard({ onSelectTool }: DashboardProps) {
           icon={
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+            </svg>
+          }
+        />
+        </div>
+
+        {/* Linha 2 — advertências e suspensão */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <ToolCard
+          title="Advertência via WhatsApp"
+          description="Preencha os dados do colaborador e das ocorrências e copie o texto pronto para enviar pelo WhatsApp."
+          onClick={() => onSelectTool('whatsapp')}
+          icon={
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
             </svg>
           }
         />
@@ -84,6 +100,10 @@ export default function Dashboard({ onSelectTool }: DashboardProps) {
             </svg>
           }
         />
+        </div>
+
+        {/* Linha 3 — em breve */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
         <ToolCard
           title="Mais ferramentas"
           description="Novas ferramentas do setor de auditoria serão adicionadas aqui."
@@ -95,6 +115,7 @@ export default function Dashboard({ onSelectTool }: DashboardProps) {
             </svg>
           }
         />
+        </div>
       </div>
     </div>
   );
