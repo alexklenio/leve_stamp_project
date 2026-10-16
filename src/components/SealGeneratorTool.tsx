@@ -9,8 +9,10 @@ interface SealGeneratorToolProps {
 }
 
 export default function SealGeneratorTool({ onBack }: SealGeneratorToolProps) {
-  // Seals exactly as read from the TXT (without the convênio field applied).
-  const [rawSeals, setRawSeals] = useState<Seal[]>([]);
+  // The list of codes, one per line. It is filled by pasting into the text
+  // area OR by uploading a TXT (the file content is loaded into the same
+  // area), so both ways go through exactly the same recognition below.
+  const [codesText, setCodesText] = useState('');
   const [zoom, setZoom] = useState(100);
   const [showBorders, setShowBorders] = useState(true);
   const [barcodeType, setBarcodeType] = useState<'numeric' | 'code128'>('code128');
@@ -18,6 +20,14 @@ export default function SealGeneratorTool({ onBack }: SealGeneratorToolProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [convenio, setConvenio] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
+  const parsed = useMemo(() => validateSeals(parseTxt(codesText)), [codesText]);
+  const rawSeals = parsed.valid;
+  const ignoredLines = parsed.invalid;
+  const duplicateCount = useMemo(
+    () => rawSeals.length - new Set(rawSeals.map((s) => s.codigo)).size,
+    [rawSeals]
+  );
 
   // Seals actually shown and exported. The convênio typed in the field is
   // applied here, so inserting/changing it updates the preview and the PDF
@@ -32,23 +42,14 @@ export default function SealGeneratorTool({ onBack }: SealGeneratorToolProps) {
     }));
   }, [rawSeals, convenio]);
 
+  const totalPages = Math.max(1, Math.ceil(seals.length / sealsPerPage));
+  const safePage = Math.min(currentPage, totalPages);
+
   const handleFileUpload = (content: string) => {
     setIsLoading(true);
     try {
-      const parsedSeals = parseTxt(content);
-
-      const { valid, invalid } = validateSeals(parsedSeals);
-
-      setRawSeals(valid);
+      setCodesText(content);
       setCurrentPage(1);
-
-      if (invalid.length > 0) {
-        alert(`⚠️ ${invalid.length} código(s) inválido(s) foi/foram ignorado(s).\n\nValor mínimo: 10 dígitos numéricos.`);
-      }
-    } catch (error) {
-      console.error('Erro ao processar arquivo:', error);
-      alert('Erro ao processar o arquivo. Verifique o formato.');
-      setRawSeals([]);
     } finally {
       setIsLoading(false);
     }
@@ -94,6 +95,57 @@ export default function SealGeneratorTool({ onBack }: SealGeneratorToolProps) {
           <div className="bg-white rounded-lg shadow-md p-6">
             <h2 className="text-lg font-bold text-gray-800 mb-4">Upload do TXT</h2>
             <UploadBox onFileUpload={handleFileUpload} isLoading={isLoading} />
+          </div>
+
+          {/* Paste codes */}
+          <div className="bg-white rounded-lg shadow-md p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-bold text-gray-800">Colar códigos</h2>
+              {codesText && (
+                <button
+                  onClick={() => {
+                    setCodesText('');
+                    setCurrentPage(1);
+                  }}
+                  className="text-xs font-semibold text-red-600 hover:text-red-800"
+                >
+                  Limpar
+                </button>
+              )}
+            </div>
+            <textarea
+              value={codesText}
+              onChange={(e) => setCodesText(e.target.value)}
+              rows={8}
+              spellCheck={false}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-leve-blue resize-y"
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              Cole a lista com um código por linha (também aceita código;convênio). Os selos são
+              gerados na hora. O conteúdo de um TXT enviado aparece aqui e pode ser editado.
+            </p>
+
+            {rawSeals.length > 0 && (
+              <p className="text-xs font-semibold text-green-700 mt-2">
+                ✓ {rawSeals.length} {rawSeals.length === 1 ? 'código reconhecido' : 'códigos reconhecidos'}
+              </p>
+            )}
+            {duplicateCount > 0 && (
+              <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-2 mt-2">
+                ⚠️ {duplicateCount} {duplicateCount === 1 ? 'código repetido' : 'códigos repetidos'} na lista.
+              </p>
+            )}
+            {ignoredLines.length > 0 && (
+              <div className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-2 mt-2">
+                <p className="font-semibold">
+                  ⚠️ {ignoredLines.length} {ignoredLines.length === 1 ? 'linha ignorada' : 'linhas ignoradas'} (o código precisa ter ao menos 10 dígitos numéricos):
+                </p>
+                <p className="font-mono break-all mt-1">
+                  {ignoredLines.slice(0, 3).map((l) => l.codigo || '(vazio)').join(' · ')}
+                  {ignoredLines.length > 3 && ` · … e mais ${ignoredLines.length - 3}`}
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Summary */}
@@ -145,7 +197,7 @@ export default function SealGeneratorTool({ onBack }: SealGeneratorToolProps) {
                 sealsPerPage={sealsPerPage}
                 showBorders={showBorders}
                 zoom={zoom}
-                currentPage={currentPage}
+                currentPage={safePage}
                 onPageChange={setCurrentPage}
                 barcodeType={barcodeType}
               />
@@ -157,8 +209,8 @@ export default function SealGeneratorTool({ onBack }: SealGeneratorToolProps) {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                 </svg>
                 <div>
-                  <p className="text-gray-500 font-semibold">Nenhum arquivo carregado</p>
-                  <p className="text-gray-400 text-sm mt-1">Carregue um arquivo TXT para começar</p>
+                  <p className="text-gray-500 font-semibold">Nenhum código carregado</p>
+                  <p className="text-gray-400 text-sm mt-1">Carregue um arquivo TXT ou cole os códigos para começar</p>
                 </div>
               </div>
             </div>
