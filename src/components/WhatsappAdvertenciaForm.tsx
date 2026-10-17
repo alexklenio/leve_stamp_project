@@ -174,6 +174,25 @@ export default function WhatsappAdvertenciaForm({ onBack }: WhatsappAdvertenciaF
     [nome, assunto, cpf, operacao, dataOcorrenciaIso, ocorrencias, atos, letras, dataEnvioIso]
   );
 
+  const isDirty = Boolean(
+    nome || assunto || cpf || operacao || dataOcorrenciaIso || atos || letras || dataEnvioIso ||
+    ocorrencias.length > 1 || ocorrencias.some((o) => o.trim())
+  );
+
+  const handleClear = () => {
+    if (!window.confirm('Limpar todos os campos? Essa ação não pode ser desfeita.')) return;
+    setNome('');
+    setAssunto('');
+    setCpf('');
+    setOperacao('');
+    setDataOcorrenciaIso('');
+    setOcorrencias(['']);
+    setAtos('');
+    setLetras('');
+    setDataEnvioIso('');
+    setCopyState('idle');
+  };
+
   const updateOcorrencia = (index: number, value: string) =>
     setOcorrencias((prev) => prev.map((o, i) => (i === index ? value : o)));
   const addOcorrencia = () => setOcorrencias((prev) => [...prev, '']);
@@ -201,6 +220,14 @@ export default function WhatsappAdvertenciaForm({ onBack }: WhatsappAdvertenciaF
         </button>
         <span className="text-gray-300">|</span>
         <h1 className="text-lg font-bold text-gray-800">Advertência via WhatsApp</h1>
+        {isDirty && (
+          <button
+            onClick={handleClear}
+            className="ml-auto text-sm font-semibold text-red-600 hover:text-red-800"
+          >
+            Limpar
+          </button>
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

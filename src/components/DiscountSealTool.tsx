@@ -71,6 +71,18 @@ export default function DiscountSealTool({ onBack }: DiscountSealToolProps) {
   const totalPages = Math.max(1, Math.ceil(seals.length / SEALS_PER_PAGE));
   const safePage = Math.min(currentPage, totalPages);
 
+  const isDirty = Boolean(tipo || sequenciaInicial || quantidade || valor || convenio);
+
+  const handleClear = () => {
+    if (!window.confirm('Limpar todos os campos? Essa ação não pode ser desfeita.')) return;
+    setTipo('');
+    setSequenciaInicial('');
+    setQuantidade('');
+    setValor('');
+    setConvenio('');
+    setCurrentPage(1);
+  };
+
   const handleExport = async () => {
     if (seals.length === 0) return;
     setIsExporting(true);
@@ -116,6 +128,14 @@ export default function DiscountSealTool({ onBack }: DiscountSealToolProps) {
         </button>
         <span className="text-gray-300">|</span>
         <h1 className="text-lg font-bold text-gray-800">Selos de Desconto (AVC)</h1>
+        {isDirty && (
+          <button
+            onClick={handleClear}
+            className="ml-auto text-sm font-semibold text-red-600 hover:text-red-800"
+          >
+            Limpar
+          </button>
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">

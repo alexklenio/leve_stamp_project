@@ -29,6 +29,16 @@ const EMPTY_DATA: AdvertenciaData = {
   testemunha2Data: '',
 };
 
+// Initial state of the whole form (also what "Limpar" goes back to).
+const INITIAL_FORM = {
+  ...EMPTY_DATA,
+  dataCometimentoIso: '',
+  dataOcorridoIso: '',
+  dataDocumentoIso: '',
+  testemunha1DataIso: '',
+  testemunha2DataIso: '',
+};
+
 // Converts a <input type="date"> value ("yyyy-mm-dd") to "dd/mm/yyyy" for
 // display/PDF, since the letter uses the Brazilian date format throughout.
 function toBrDate(isoDate: string): string {
@@ -68,14 +78,7 @@ export default function AdvertenciaForm({ onBack }: AdvertenciaFormProps) {
   // Dates are kept as native <input type="date"> (yyyy-mm-dd) in state for
   // a proper date picker UX, and converted to dd/mm/yyyy only when building
   // the data sent to the PDF / preview.
-  const [form, setForm] = useState({
-    ...EMPTY_DATA,
-    dataCometimentoIso: '',
-    dataOcorridoIso: '',
-    dataDocumentoIso: '',
-    testemunha1DataIso: '',
-    testemunha2DataIso: '',
-  });
+  const [form, setForm] = useState(INITIAL_FORM);
   const [isExporting, setIsExporting] = useState(false);
 
   const set = (key: string) => (value: string) =>
@@ -103,6 +106,14 @@ export default function AdvertenciaForm({ onBack }: AdvertenciaFormProps) {
     testemunha2Nome: form.testemunha2Nome,
     testemunha2Data: toBrDate(form.testemunha2DataIso),
   });
+
+  const isDirty = JSON.stringify(form) !== JSON.stringify(INITIAL_FORM);
+
+  const handleClear = () => {
+    if (window.confirm('Limpar todos os campos? Essa ação não pode ser desfeita.')) {
+      setForm(INITIAL_FORM);
+    }
+  };
 
   const handleExport = async () => {
     setIsExporting(true);
@@ -133,6 +144,14 @@ export default function AdvertenciaForm({ onBack }: AdvertenciaFormProps) {
         </button>
         <span className="text-gray-300">|</span>
         <h1 className="text-lg font-bold text-gray-800">Carta de Advertência Disciplinar</h1>
+        {isDirty && (
+          <button
+            onClick={handleClear}
+            className="ml-auto text-sm font-semibold text-red-600 hover:text-red-800"
+          >
+            Limpar
+          </button>
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
