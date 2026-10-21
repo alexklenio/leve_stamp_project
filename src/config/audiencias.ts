@@ -42,8 +42,8 @@ export const AUDIENCIAS_CONFIG: AudienciasConfig = {
   sheetGid: '0',
 
   // Preencha depois de implantar o Apps Script (veja AUDIENCIAS_SETUP.md, passo 2).
-  scriptUrl: '',
-  scriptToken: '',
+  scriptUrl: 'https://script.google.com/macros/s/AKfycbwthKGdVE8AnxXrPH40Z_5X5WCJi0zqP-DO1cS3iQ4UBVqOGDsUBc_iHSEASg-4kJfQ/exec',
+  scriptToken: 'DESENVOLVIDO_POR_ALEX_LOPES_21102026',
 
   refreshIntervalMs: 60000,
 
