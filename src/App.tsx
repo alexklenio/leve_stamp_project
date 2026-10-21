@@ -5,17 +5,54 @@ import DiscountSealTool from './components/DiscountSealTool';
 import WhatsappAdvertenciaForm from './components/WhatsappAdvertenciaForm';
 import SuspensionForm from './components/SuspensionForm';
 import AdvertenciaForm from './components/AdvertenciaForm';
+import AudienciasDashboard from './components/AudienciasDashboard';
+import NovoCompromissoForm from './components/NovoCompromissoForm';
 import { LEVE_LOGO_WHITE_BASE64, LEVE_LOGO_WHITE_ASPECT_RATIO } from './assets/leveLogoBase64';
 
-type View = 'dashboard' | 'selos' | 'desconto' | 'whatsapp' | 'suspensao' | 'advertencia';
+type View =
+  | 'dashboard'
+  | 'selos'
+  | 'desconto'
+  | 'whatsapp'
+  | 'suspensao'
+  | 'advertencia'
+  | 'audiencias'
+  | 'audiencia-nova';
+
+type Section = 'ferramentas' | 'audiencias';
+
+function TabButton({
+  label,
+  active,
+  onClick,
+}: {
+  label: string;
+  active: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      aria-current={active ? 'page' : undefined}
+      className={`px-6 sm:px-8 py-2.5 rounded-t-lg text-base md:text-lg font-extrabold uppercase tracking-tight transition-colors ${
+        active ? 'bg-gray-50 text-leve-blue' : 'bg-white bg-opacity-15 text-white hover:bg-opacity-25'
+      }`}
+    >
+      {label}
+    </button>
+  );
+}
 
 export default function App() {
   const [view, setView] = useState<View>('dashboard');
 
+  const section: Section =
+    view === 'audiencias' || view === 'audiencia-nova' ? 'audiencias' : 'ferramentas';
+
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-50 to-gray-100">
-      {/* Header — shared across every screen (Dashboard and every tool) */}
-      <header className="bg-leve-blue text-white px-6 py-3 shadow-lg">
+      {/* Header — shared across every screen. The tabs sit on its bottom edge. */}
+      <header className="bg-leve-blue text-white px-6 pt-3 shadow-lg">
         <div className="max-w-7xl mx-auto">
           <button
             onClick={() => setView('dashboard')}
@@ -33,7 +70,26 @@ export default function App() {
               - SETOR DE AUDITORIA
             </span>
           </button>
-          <p className="text-gray-200 text-sm">Ferramentas do setor de auditoria.</p>
+
+          <div className="flex flex-wrap items-end gap-x-10 gap-y-2">
+            <p className="text-gray-200 text-sm pb-3">
+              {section === 'audiencias'
+                ? 'Acompanhamento de audiências e compromissos.'
+                : 'Ferramentas do setor de auditoria.'}
+            </p>
+            <nav className="flex gap-2">
+              <TabButton
+                label="Ferramentas"
+                active={section === 'ferramentas'}
+                onClick={() => setView('dashboard')}
+              />
+              <TabButton
+                label="Audiências"
+                active={section === 'audiencias'}
+                onClick={() => setView('audiencias')}
+              />
+            </nav>
+          </div>
         </div>
       </header>
 
@@ -45,6 +101,8 @@ export default function App() {
         {view === 'whatsapp' && <WhatsappAdvertenciaForm onBack={() => setView('dashboard')} />}
         {view === 'suspensao' && <SuspensionForm onBack={() => setView('dashboard')} />}
         {view === 'advertencia' && <AdvertenciaForm onBack={() => setView('dashboard')} />}
+        {view === 'audiencias' && <AudienciasDashboard onNew={() => setView('audiencia-nova')} />}
+        {view === 'audiencia-nova' && <NovoCompromissoForm onBack={() => setView('audiencias')} />}
       </main>
 
       {/* Footer */}
