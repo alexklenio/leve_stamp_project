@@ -21,6 +21,11 @@ type View =
 
 type Section = 'ferramentas' | 'audiencias';
 
+const SUBTITLES: Record<Section, string> = {
+  ferramentas: 'Ferramentas do setor de auditoria.',
+  audiencias: 'Acompanhamento de audiências e compromissos.',
+};
+
 function TabButton({
   label,
   active,
@@ -72,11 +77,21 @@ export default function App() {
           </button>
 
           <div className="flex flex-wrap items-end gap-x-10 gap-y-2">
-            <p className="text-gray-200 text-sm pb-3">
-              {section === 'audiencias'
-                ? 'Acompanhamento de audiências e compromissos.'
-                : 'Ferramentas do setor de auditoria.'}
-            </p>
+            {/* All subtitles share the same grid cell; the hidden ones only reserve space,
+                so this block always has the width of the longest text and the tabs stay put. */}
+            <div className="grid pb-3">
+              {(Object.keys(SUBTITLES) as Section[]).map((key) => (
+                <p
+                  key={key}
+                  aria-hidden={key !== section}
+                  className={`col-start-1 row-start-1 text-gray-200 text-sm ${
+                    key === section ? '' : 'invisible'
+                  }`}
+                >
+                  {SUBTITLES[key]}
+                </p>
+              ))}
+            </div>
             <nav className="flex gap-2">
               <TabButton
                 label="Ferramentas"
