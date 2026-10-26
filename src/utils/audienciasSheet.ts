@@ -4,6 +4,14 @@ import type { AudienciasConfig } from '../config/audiencias';
 // Types
 // ===========================================================================
 
+/** What is needed to read a Google Sheet. Any dashboard config that has these fields works. */
+export interface SheetSource {
+  sheetId: string;
+  sheetName: string;
+  sheetGid: string;
+  columnLabels: Record<string, string>;
+}
+
 export type ColumnType = 'string' | 'number' | 'boolean' | 'date' | 'datetime' | 'timeofday';
 
 export interface SheetColumn {
@@ -184,7 +192,7 @@ function asColumnType(type: string | undefined): ColumnType {
   return type !== undefined && COLUMN_TYPES.includes(type) ? (type as ColumnType) : 'string';
 }
 
-export function isConfigured(cfg: AudienciasConfig): boolean {
+export function isConfigured(cfg: { sheetId: string }): boolean {
   const id = cfg.sheetId.trim();
   return id !== '' && !id.startsWith('COLE_');
 }
@@ -270,7 +278,7 @@ export function parseGvizResponse(
   return { columns, rows };
 }
 
-export async function fetchSheetData(cfg: AudienciasConfig): Promise<SheetData> {
+export async function fetchSheetData(cfg: SheetSource): Promise<SheetData> {
   const params = new URLSearchParams({ tqx: 'out:json', headers: '1' });
   if (cfg.sheetName.trim()) {
     params.set('sheet', cfg.sheetName.trim());

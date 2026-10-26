@@ -7,6 +7,7 @@ import SuspensionForm from './components/SuspensionForm';
 import AdvertenciaForm from './components/AdvertenciaForm';
 import AudienciasDashboard from './components/AudienciasDashboard';
 import NovoCompromissoForm from './components/NovoCompromissoForm';
+import ProdutividadeDashboard from './components/ProdutividadeDashboard';
 import { LEVE_LOGO_WHITE_BASE64, LEVE_LOGO_WHITE_ASPECT_RATIO } from './assets/leveLogoBase64';
 
 type View =
@@ -17,13 +18,15 @@ type View =
   | 'suspensao'
   | 'advertencia'
   | 'audiencias'
-  | 'audiencia-nova';
+  | 'audiencia-nova'
+  | 'produtividade';
 
-type Section = 'ferramentas' | 'audiencias';
+type Section = 'ferramentas' | 'audiencias' | 'produtividade';
 
 const SUBTITLES: Record<Section, string> = {
   ferramentas: 'Ferramentas do setor de auditoria.',
   audiencias: 'Acompanhamento de audiências e compromissos.',
+  produtividade: 'Indicadores de produtividade do setor.',
 };
 
 function TabButton({
@@ -51,8 +54,9 @@ function TabButton({
 export default function App() {
   const [view, setView] = useState<View>('dashboard');
 
-  const section: Section =
-    view === 'audiencias' || view === 'audiencia-nova' ? 'audiencias' : 'ferramentas';
+  let section: Section = 'ferramentas';
+  if (view === 'audiencias' || view === 'audiencia-nova') section = 'audiencias';
+  else if (view === 'produtividade') section = 'produtividade';
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-50 to-gray-100">
@@ -103,6 +107,11 @@ export default function App() {
                 active={section === 'audiencias'}
                 onClick={() => setView('audiencias')}
               />
+              <TabButton
+                label="Produtividade"
+                active={section === 'produtividade'}
+                onClick={() => setView('produtividade')}
+              />
             </nav>
           </div>
         </div>
@@ -118,6 +127,7 @@ export default function App() {
         {view === 'advertencia' && <AdvertenciaForm onBack={() => setView('dashboard')} />}
         {view === 'audiencias' && <AudienciasDashboard onNew={() => setView('audiencia-nova')} />}
         {view === 'audiencia-nova' && <NovoCompromissoForm onBack={() => setView('audiencias')} />}
+        {view === 'produtividade' && <ProdutividadeDashboard />}
       </main>
 
       {/* Footer */}
