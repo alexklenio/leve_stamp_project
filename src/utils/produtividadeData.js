@@ -1,5 +1,6 @@
-import { normalize, refMatches } from './audienciasSheet';
-export const EMPTY_FILTERS = { auditors: [], motivos: [], months: [], years: [] };
+import { PRODUTIVIDADE_CONFIG } from '../config/produtividade';
+import { normalize, pad2, refMatches } from './audienciasSheet';
+export const EMPTY_FILTERS = { auditors: [], motivos: [], months: [], years: [], name: '' };
 export const MONTH_NAMES = [
     'Janeiro',
     'Fevereiro',
@@ -16,11 +17,24 @@ export const MONTH_NAMES = [
 ];
 const MONTH_KEYS = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
 export const BLANK_LABEL = '(Sem informação)';
-/** Same blue / red / yellow / green order used by Google Sheets charts. */
-export const PALETTE = ['#4285F4', '#EA4335', '#FBBC04', '#34A853', '#AB47BC', '#00ACC1', '#FF7043', '#8D6E63'];
+/** Colours for motivos that are not listed in the config (red and blue are kept for the fixed ones). */
+const EXTRA_COLORS = ['#FBBC04', '#34A853', '#AB47BC', '#00ACC1', '#FF7043', '#8D6E63'];
+/** Fixed colours from the config, looked up by normalized name (case/accents don't matter). */
+const FIXED_COLORS = new Map(Object.keys(PRODUTIVIDADE_CONFIG.motivoColors).map((name) => [
+    normalize(name),
+    PRODUTIVIDADE_CONFIG.motivoColors[name],
+]));
+/**
+ * Colour of a motivo. Motivos set in the config always keep their colour; the others get
+ * automatic colours in alphabetical order, so nothing changes when the filters change.
+ */
 export function motivoColor(order, label) {
-    const index = order.indexOf(label);
-    return index < 0 ? '#9AA0A6' : PALETTE[index % PALETTE.length];
+    const fixed = FIXED_COLORS.get(normalize(label));
+    if (fixed)
+        return fixed;
+    const others = order.filter((l) => !FIXED_COLORS.has(normalize(l)));
+    const index = others.indexOf(label);
+    return index < 0 ? '#9AA0A6' : EXTRA_COLORS[index % EXTRA_COLORS.length];
 }
 // ===========================================================================
 // Parsing
@@ -76,14 +90,14 @@ function parseDateParts(raw, text) {
 // ===========================================================================
 // Column detection
 // ===========================================================================
-function findByConfigOrPattern(columns, ref, patterns) {
+function findByConfigOrPattern(columns, ref, patterns, exclude = []) {
     if (ref.trim() !== '') {
         const configured = columns.find((c) => refMatches(c, ref));
         if (configured)
             return configured;
     }
     for (const pattern of patterns) {
-        const found = columns.find((c) => pattern.test(normalize(c.label)));
+        const found = columns.find((c) => !exclude.includes(c) && pattern.test(normalize(c.label)));
         if (found)
             return found;
     }
@@ -94,6 +108,8 @@ export function detectProdColumns(columns, cfg) {
     const motivo = findByConfigOrPattern(columns, cfg.motivoColumn, [/motivo/, /alinea/, /justa/]);
     const month = findByConfigOrPattern(columns, cfg.monthColumn, [/^mes$/, /\bmes\b/]);
     const year = findByConfigOrPattern(columns, cfg.yearColumn, [/^ano$/, /\bano\b/]);
+    // The collaborator is never the auditor or the motivo column.
+    const name = findByConfigOrPattern(columns, cfg.nameColumn, [/colaborador/, /funcionario/, /^nome$/, /\bnome\b/, /empregado/], [auditor, motivo]);
     let date = null;
     if (cfg.dateColumn.trim() !== '') {
         date = columns.find((c) => refMatches(c, cfg.dateColumn)) ?? null;
@@ -104,7 +120,7 @@ export function detectProdColumns(columns, cfg) {
                 columns.find((c) => /^data\b|\bdata\b/.test(normalize(c.label))) ??
                 null;
     }
-    return { auditor, motivo, month, year, date };
+    return { auditor, motivo, month, year, name, date };
 }
 // ===========================================================================
 // Building rows
@@ -157,6 +173,14 @@ export function buildProdRows(data, cfg) {
                     month = parts.month;
             }
         }
+        const numbers = {};
+        data.columns.forEach((c) => {
+            const raw = row.cells[c.label]?.raw;
+            if (c.type === 'number' && typeof raw === 'number')
+                numbers[c.label] = raw;
+        });
+        // Name search: the collaborator column; if the sheet has none, the whole row.
+        const searchSource = map.name ? cell(map.name)?.text ?? '' : Object.values(cells).join(' ');
         return {
             id: `row-${row.rowNumber}`,
             rowNumber: row.rowNumber,
@@ -165,6 +189,8 @@ export function buildProdRows(data, cfg) {
             motivo: canonMotivo(cell(map.motivo)?.text ?? ''),
             year,
             month,
+            searchText: normalize(searchSource),
+            numbers,
         };
     });
     return { rows, columns, map };
@@ -192,13 +218,16 @@ export function filterOptions(rows) {
     };
 }
 export function applyFilters(rows, f) {
-    return rows.filter((r) => (f.auditors.length === 0 || f.auditors.includes(r.auditor)) &&
+    // Every word typed must appear in the name (any order, without caring about accents or case).
+    const terms = normalize(f.name).split(/\s+/).filter(Boolean);
+    return rows.filter((r) => terms.every((term) => r.searchText.includes(term)) &&
+        (f.auditors.length === 0 || f.auditors.includes(r.auditor)) &&
         (f.motivos.length === 0 || f.motivos.includes(r.motivo)) &&
         (f.months.length === 0 || (r.month !== null && f.months.includes(r.month))) &&
         (f.years.length === 0 || (r.year !== null && f.years.includes(r.year))));
 }
 export function hasActiveFilters(f) {
-    return f.auditors.length + f.motivos.length + f.months.length + f.years.length > 0;
+    return f.auditors.length + f.motivos.length + f.months.length + f.years.length > 0 || f.name.trim() !== '';
 }
 // ===========================================================================
 // Aggregations (every chart is computed from the already filtered rows)
@@ -242,4 +271,39 @@ export function niceScale(max) {
         .filter((c) => Number.isInteger(c) && c >= 1);
     const step = candidates.find((c) => c >= rough) ?? Math.max(1, Math.ceil(rough));
     return { top: Math.ceil(max / step) * step, step };
+}
+// ===========================================================================
+// Export (.xlsx)
+// ===========================================================================
+/**
+ * What goes into the .xlsx: the table exactly as shown (same columns, same order), with ALL the
+ * rows that pass the current filters — not just the ones the table has loaded so far.
+ * When filters are active, a second sheet records which ones were applied.
+ */
+export function buildProdExport(build, rows, filters, now = new Date()) {
+    const header = build.columns.map((c) => c.label);
+    const body = rows.map((r) => build.columns.map((c) => r.numbers[c.label] ?? r.cells[c.label] ?? ''));
+    const sheets = [{ name: 'Registros', header, rows: body }];
+    if (hasActiveFilters(filters)) {
+        const info = [];
+        if (filters.auditors.length > 0)
+            info.push(['Auditor', filters.auditors.join(', ')]);
+        if (filters.motivos.length > 0)
+            info.push(['Motivo', filters.motivos.join(', ')]);
+        if (filters.months.length > 0) {
+            info.push(['Mês', filters.months.map((m) => MONTH_NAMES[m - 1]).join(', ')]);
+        }
+        if (filters.years.length > 0)
+            info.push(['Ano', filters.years.join(', ')]);
+        if (filters.name.trim() !== '')
+            info.push(['Colaborador (busca)', filters.name.trim()]);
+        info.push(['Registros exportados', rows.length]);
+        info.push(['Total de registros na planilha', build.rows.length]);
+        info.push([
+            'Exportado em',
+            `${pad2(now.getDate())}/${pad2(now.getMonth() + 1)}/${now.getFullYear()} ${pad2(now.getHours())}:${pad2(now.getMinutes())}`,
+        ]);
+        sheets.push({ name: 'Filtros aplicados', header: ['Filtro', 'Valor'], rows: info });
+    }
+    return sheets;
 }

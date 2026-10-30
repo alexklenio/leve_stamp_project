@@ -22,10 +22,14 @@ export interface ProdutividadeConfig {
   monthColumn: string;
   /** Coluna do ano (detecta "ANO"). */
   yearColumn: string;
+  /** Coluna com o nome do colaborador, usada na busca por nome (detecta "COLABORADOR", "FUNCIONÁRIO" ou "NOME"). */
+  nameColumn: string;
   /** Coluna de data, usada só se MÊS e/ou ANO não existirem como colunas. */
   dateColumn: string;
   /** Colunas que NÃO aparecem na tabela. */
   hiddenColumns: string[];
+  /** Cor de cada motivo nos gráficos (nome do motivo -> cor). Os motivos que não estiverem aqui usam cores automáticas. */
+  motivoColors: Record<string, string>;
 }
 
 export const PRODUTIVIDADE_CONFIG: ProdutividadeConfig = {
@@ -40,6 +44,13 @@ export const PRODUTIVIDADE_CONFIG: ProdutividadeConfig = {
   motivoColumn: '',
   monthColumn: '',
   yearColumn: '',
+  nameColumn: '',
   dateColumn: '',
   hiddenColumns: [],
+
+  // Ato de improbidade em vermelho e mau procedimento em azul.
+  motivoColors: {
+    'ATO DE IMPROBIDADE': '#EA4335',
+    'MAU PROCEDIMENTO': '#4285F4',
+  },
 };

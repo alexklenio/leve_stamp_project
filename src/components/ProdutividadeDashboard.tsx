@@ -5,6 +5,7 @@ import { pad2 } from '../utils/audienciasSheet';
 import {
   aggregate,
   applyFilters,
+  buildProdExport,
   buildProdRows,
   EMPTY_FILTERS,
   filterOptions,
@@ -13,6 +14,7 @@ import {
   MONTH_NAMES,
   motivoColor,
 } from '../utils/produtividadeData';
+import { buildXlsx, downloadXlsx } from '../utils/xlsxExport';
 import MultiSelect from './MultiSelect';
 import { KpiCard, PieChartCard, StackedBarsCard, StackedColumnsCard } from './ProdutividadeCharts';
 
@@ -36,6 +38,8 @@ export default function ProdutividadeDashboard() {
   // Colours follow the order of ALL motivos, so they don't change when filtering.
   const aggregates = useMemo(() => aggregate(filtered, options.motivos), [filtered, options.motivos]);
 
+  const filtering = hasActiveFilters(filters);
+
   const updateFilters = (patch: Partial<Filters>) => {
     setFilters((prev) => ({ ...prev, ...patch }));
     setLimit(PAGE_SIZE);
@@ -45,7 +49,21 @@ export default function ProdutividadeDashboard() {
     setLimit(PAGE_SIZE);
   };
 
-  const filtering = hasActiveFilters(filters);
+  // Exports the table exactly as filtered now: everything when no filter is active,
+  // otherwise only the filtered rows (all of them, not just the ones loaded on screen).
+  const handleExport = () => {
+    if (!built || filtered.length === 0) return;
+    try {
+      const sheets = buildProdExport(built, filtered, filters);
+      const today = new Date();
+      const stamp = `${today.getFullYear()}-${pad2(today.getMonth() + 1)}-${pad2(today.getDate())}`;
+      downloadXlsx(buildXlsx(sheets), `produtividade${filtering ? '_filtrado' : ''}_${stamp}.xlsx`);
+    } catch (err) {
+      console.error('Erro ao exportar .xlsx:', err);
+      alert('Não foi possível gerar o arquivo .xlsx.');
+    }
+  };
+
   const updatedText = lastUpdated
     ? `Atualizado às ${pad2(lastUpdated.getHours())}:${pad2(lastUpdated.getMinutes())}`
     : '';
@@ -163,19 +181,70 @@ export default function ProdutividadeDashboard() {
               />
             </div>
 
+            {/* Search by collaborator name */}
+            <div className="mt-4">
+              <label className="block text-xs font-bold uppercase text-gray-500 mb-1">Colaborador</label>
+              <div className="relative">
+                <input
+                  type="text"
+                  value={filters.name}
+                  onChange={(e) => updateFilters({ name: e.target.value })}
+                  placeholder="Buscar pelo nome do colaborador"
+                  className={`w-full px-3 py-2 pr-10 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-leve-blue ${
+                    filters.name.trim() !== '' ? 'border-leve-blue' : 'border-gray-300'
+                  }`}
+                />
+                {filters.name !== '' && (
+                  <button
+                    type="button"
+                    onClick={() => updateFilters({ name: '' })}
+                    aria-label="Limpar busca por nome"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 w-6 h-6 flex items-center justify-center rounded text-gray-400 hover:text-gray-700 hover:bg-gray-100"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                )}
+              </div>
+              {!built.map.name && (
+                <p className="mt-1 text-xs text-amber-700">
+                  Não encontrei a coluna do colaborador: a busca olha todas as colunas. Informe o nome
+                  dela em <span className="font-mono">nameColumn</span> (src/config/produtividade.ts).
+                </p>
+              )}
+            </div>
+
             <div className="flex flex-wrap items-center justify-between gap-3 mt-4 pt-4 border-t border-gray-100 text-sm">
               <p className="text-gray-500">
                 Mostrando <b className="text-gray-800">{filtered.length.toLocaleString('pt-BR')}</b> de{' '}
                 {built.rows.length.toLocaleString('pt-BR')} registros
               </p>
-              {filtering && (
+              <div className="flex items-center gap-4">
+                {filtering && (
+                  <button
+                    onClick={clearFilters}
+                    className="font-semibold text-red-600 hover:text-red-800"
+                  >
+                    Limpar filtros
+                  </button>
+                )}
                 <button
-                  onClick={clearFilters}
-                  className="font-semibold text-red-600 hover:text-red-800"
+                  onClick={handleExport}
+                  disabled={filtered.length === 0}
+                  title={
+                    filtering
+                      ? `Exporta os ${filtered.length.toLocaleString('pt-BR')} registros filtrados`
+                      : `Exporta todos os ${filtered.length.toLocaleString('pt-BR')} registros`
+                  }
+                  className="flex items-center gap-2 px-4 py-2 bg-leve-blue text-white rounded-lg font-semibold hover:bg-blue-900 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Limpar filtros
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5m0 0l5-5m-5 5V4" />
+                  </svg>
+                  Exportar .xlsx
                 </button>
-              )}
+              </div>
             </div>
 
             {missing.length > 0 && (

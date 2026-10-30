@@ -11,6 +11,12 @@ export const PRODUTIVIDADE_CONFIG = {
     motivoColumn: '',
     monthColumn: '',
     yearColumn: '',
+    nameColumn: '',
     dateColumn: '',
     hiddenColumns: [],
+    // Ato de improbidade em vermelho e mau procedimento em azul.
+    motivoColors: {
+        'ATO DE IMPROBIDADE': '#EA4335',
+        'MAU PROCEDIMENTO': '#4285F4',
+    },
 };
